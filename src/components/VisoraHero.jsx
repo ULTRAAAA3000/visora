@@ -64,7 +64,7 @@ const VisoraHero = () => {
         {/* Left: VISORA Logo SVG */}
         <div className="animate-blur-fade-up" style={{ animationDelay: '0ms' }}>
           <a href="#" className="block h-8 md:h-10">
-            <svg viewBox="0 0 350 70" fill="currentColor" className="h-full w-auto text-white">
+            <svg viewBox="0 0 270 70" fill="currentColor" className="h-full w-auto text-white">
               <text
                 x="0"
                 y="55"
@@ -76,7 +76,7 @@ const VisoraHero = () => {
                 VISOR
               </text>
               <path
-                d="M305 55 L328 10 L350 55"
+                d="M212 55 L233 10 L254 55"
                 stroke="currentColor"
                 strokeWidth="7"
                 fill="none"
