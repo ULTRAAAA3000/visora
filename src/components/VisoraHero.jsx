@@ -61,28 +61,10 @@ const VisoraHero = () => {
 
       {/* NAVBAR */}
       <header className="relative z-50 flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 md:py-6 w-full">
-        {/* Left: VISORA Logo SVG */}
+        {/* Left: VISORA Logo */}
         <div className="animate-blur-fade-up" style={{ animationDelay: '0ms' }}>
           <a href="#" className="block h-8 md:h-10">
-            <svg viewBox="0 0 270 70" fill="currentColor" className="h-full w-auto text-white">
-              <text
-                x="0"
-                y="55"
-                fontFamily="'Inter', sans-serif"
-                fontWeight="400"
-                fontSize="54"
-                letterSpacing="12"
-              >
-                VISOR
-              </text>
-              <path
-                d="M212 55 L233 10 L254 55"
-                stroke="currentColor"
-                strokeWidth="7"
-                fill="none"
-                strokeLinecap="square"
-              />
-            </svg>
+            <img src="/visora-logo.png" alt="Visora" className="h-full w-auto object-contain" />
           </a>
         </div>
 
