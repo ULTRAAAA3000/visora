@@ -22,10 +22,28 @@ Chromium instead of an AI model guessing at pixels.
 ## Structure
 
 ```
-src/components/VisoraHero.jsx   Landing page hero component (Pages)
+index.html                      Vite entry point
+src/main.jsx                    Mounts the hero page
+src/components/VisoraHero.jsx   Landing page hero component
 supabase/migrations/            Postgres schema + RLS policies
 worker/                         Cloudflare Worker render engine
 worker/wrangler.toml            Worker config: Browser Rendering + R2 bindings
+```
+
+## Frontend (Cloudflare Pages) setup
+
+In the Pages project's **Settings → Build**, set:
+
+- **Build command**: `npm run build`
+- **Build output directory**: `dist`
+- **Root directory**: `/` (repo root)
+
+Local dev:
+
+```bash
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # outputs to dist/
 ```
 
 ## Render worker setup
