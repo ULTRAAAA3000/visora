@@ -1,4 +1,4 @@
-import { getBrowser } from './browser.js';
+import puppeteer from '@cloudflare/puppeteer';
 
 /**
  * Replaces {{key}} placeholders in the template's html_body with values
@@ -16,31 +16,27 @@ export function fillTemplate(htmlBody, data = {}, defaultVariables = {}) {
 }
 
 /**
- * Renders a filled HTML string to a PNG/JPEG buffer at the requested
- * dimensions using a shared, already-warm Chromium instance.
+ * Renders a filled HTML string to an image buffer using Cloudflare's
+ * Browser Rendering binding (a Cloudflare-managed Chromium fleet reached
+ * over an RPC channel — there is no local browser process on a Worker).
  */
-export async function renderHtmlToImage({ html, width, height, format = 'png' }) {
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+export async function renderHtmlToImage(browserBinding, { html, width, height, format = 'png' }) {
+  const browser = await puppeteer.launch(browserBinding);
 
   try {
+    const page = await browser.newPage();
     await page.setViewport({ width, height, deviceScaleFactor: 1 });
 
-    // 'domcontentloaded' is enough since templates are self-contained
-    // (inline styles / Tailwind CDN script), and networkidle waits are
-    // exactly the kind of latency this engine exists to avoid.
-    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 5000 });
+    // Templates are self-contained (inline styles / Tailwind CDN script),
+    // so 'domcontentloaded' is enough — no need to wait on network idle.
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => (document.fonts ? document.fonts.ready : true));
 
-    // Let @import fonts / Tailwind CDN script finish applying styles.
-    await page.evaluateHandle('document.fonts ? document.fonts.ready : true');
-
-    const buffer = await page.screenshot({
+    return await page.screenshot({
       type: format === 'jpeg' ? 'jpeg' : 'png',
       clip: { x: 0, y: 0, width, height },
     });
-
-    return buffer;
   } finally {
-    await page.close();
+    await browser.close();
   }
 }

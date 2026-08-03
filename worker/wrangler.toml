@@ -1,0 +1,21 @@
+name = "visora-render-worker"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare Browser Rendering — lets a Worker drive a real headless
+# Chromium instance managed by Cloudflare. Requires the Workers Paid
+# plan; billed per browser-minute on top of that. Enable it for your
+# account at: https://dash.cloudflare.com -> Workers & Pages -> Browser Rendering
+[browser]
+binding = "MYBROWSER"
+
+# R2 bucket that stores rendered PNG/JPEG output. Create it first with:
+#   npx wrangler r2 bucket create visora-renders
+[[r2_buckets]]
+binding = "RENDERS"
+bucket_name = "visora-renders"
+
+# Secrets — do NOT put these here. Set them with:
+#   npx wrangler secret put SUPABASE_URL
+#   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY

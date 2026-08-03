@@ -1,43 +1,59 @@
-import Fastify from 'fastify';
-import rateLimit from '@fastify/rate-limit';
 import { createClient } from '@supabase/supabase-js';
 import { nanoid } from 'nanoid';
 
-import { createAuthMiddleware } from './middleware/auth.js';
+import { authenticate, json } from './lib/auth.js';
 import { fillTemplate, renderHtmlToImage } from './lib/render.js';
-import { closeBrowser } from './lib/browser.js';
 
-const {
-  SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY,
-  STORAGE_BUCKET = 'renders',
-  PORT = 8787,
-} = process.env;
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error(
-    'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables.'
-  );
-}
+    if (url.pathname === '/health') {
+      return json({ status: 'ok' });
+    }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-const authenticate = createAuthMiddleware(supabase);
+    // Serve previously rendered images straight out of R2, so the API
+    // response's image_url can point at this same Worker's domain
+    // without needing R2's bucket-level public access enabled.
+    if (request.method === 'GET' && url.pathname.startsWith('/renders/')) {
+      const key = url.pathname.replace('/renders/', '');
+      const object = await env.RENDERS.get(key);
+      if (!object) return new Response('Not found', { status: 404 });
 
-const app = Fastify({ logger: true });
+      return new Response(object.body, {
+        headers: {
+          'content-type': object.httpMetadata?.contentType || 'image/png',
+          'cache-control': 'public, max-age=31536000, immutable',
+        },
+      });
+    }
 
-await app.register(rateLimit, {
-  max: 60, // per-IP ceiling; per-key quota is enforced separately via Supabase
-  timeWindow: '1 minute',
-});
+    if (request.method === 'POST' && url.pathname === '/api/v1/render') {
+      return handleRender(request, env, ctx, url);
+    }
 
-app.get('/health', async () => ({ status: 'ok' }));
+    return new Response('Not found', { status: 404 });
+  },
+};
 
-app.post('/api/v1/render', { preHandler: authenticate }, async (request, reply) => {
+async function handleRender(request, env, ctx, url) {
   const startedAt = Date.now();
-  const { template_id, format = 'png', cache = true, data = {} } = request.body ?? {};
+  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 
+  const auth = await authenticate(request, supabase);
+  if (auth.error) return auth.error;
+  const { profile } = auth;
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ success: false, error: 'Invalid JSON body.' }, 400);
+  }
+
+  const { template_id, format = 'png', data = {} } = body ?? {};
   if (!template_id) {
-    return reply.code(400).send({ success: false, error: '`template_id` is required.' });
+    return json({ success: false, error: '`template_id` is required.' }, 400);
   }
 
   const { data: template, error: templateError } = await supabase
@@ -47,82 +63,60 @@ app.post('/api/v1/render', { preHandler: authenticate }, async (request, reply) 
     .single();
 
   if (templateError || !template) {
-    return reply.code(404).send({ success: false, error: 'Template not found.' });
+    return json({ success: false, error: 'Template not found.' }, 404);
   }
 
   const html = fillTemplate(template.html_body, data, template.default_variables ?? {});
 
   let imageBuffer;
   try {
-    imageBuffer = await renderHtmlToImage({
+    imageBuffer = await renderHtmlToImage(env.MYBROWSER, {
       html,
       width: template.width ?? 1200,
       height: template.height ?? 630,
       format,
     });
   } catch (err) {
-    request.log.error(err, 'Render failed');
-    return reply.code(500).send({ success: false, error: 'Render failed.' });
+    console.error('Render failed', err);
+    return json({ success: false, error: 'Render failed.' }, 500);
   }
 
   const renderTimeMs = Date.now() - startedAt;
-  const fileName = `${new Date().toISOString().slice(0, 7)}/render_${nanoid(10)}.${format}`;
+  const key = `${new Date().toISOString().slice(0, 7)}/render_${nanoid(10)}.${format}`;
 
-  const { error: uploadError } = await supabase.storage
-    .from(STORAGE_BUCKET)
-    .upload(fileName, imageBuffer, {
-      contentType: format === 'jpeg' ? 'image/jpeg' : 'image/png',
-      cacheControl: cache ? '31536000' : '0',
-      upsert: false,
-    });
+  await env.RENDERS.put(key, imageBuffer, {
+    httpMetadata: { contentType: format === 'jpeg' ? 'image/jpeg' : 'image/png' },
+  });
 
-  if (uploadError) {
-    request.log.error(uploadError, 'Upload to storage failed');
-    return reply.code(500).send({ success: false, error: 'Storage upload failed.' });
-  }
+  const imageUrl = `${url.origin}/renders/${key}`;
 
-  const { data: publicUrlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
+  // Bookkeeping shouldn't block the response, but Workers terminate the
+  // isolate once the response is returned unless kept alive explicitly.
+  ctx.waitUntil(
+    Promise.all([
+      supabase
+        .from('profiles')
+        .update({ usage_this_month: profile.usage_this_month + 1 })
+        .eq('id', profile.id),
+      supabase.from('render_logs').insert({
+        user_id: profile.id,
+        template_id,
+        render_time_ms: renderTimeMs,
+        status_code: 200,
+        image_url: imageUrl,
+      }),
+    ]).catch((err) => console.error('Post-render bookkeeping failed', err))
+  );
 
-  // Fire-and-forget usage + log bookkeeping — doesn't block the response.
-  Promise.all([
-    supabase
-      .from('profiles')
-      .update({ usage_this_month: request.profile.usage_this_month + 1 })
-      .eq('id', request.profile.id),
-    supabase.from('render_logs').insert({
-      user_id: request.profile.id,
-      template_id,
-      render_time_ms: renderTimeMs,
-      status_code: 200,
-      image_url: publicUrlData.publicUrl,
-    }),
-  ]).catch((err) => request.log.error(err, 'Post-render bookkeeping failed'));
-
-  return reply.send({
+  return json({
     success: true,
     render_time: `${renderTimeMs}ms`,
     cached: false,
     data: {
-      url: publicUrlData.publicUrl,
+      url: imageUrl,
       width: template.width ?? 1200,
       height: template.height ?? 630,
       format,
     },
   });
-});
-
-const shutdown = async () => {
-  await closeBrowser();
-  await app.close();
-  process.exit(0);
-};
-
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
-
-app
-  .listen({ port: Number(PORT), host: '0.0.0.0' })
-  .catch((err) => {
-    app.log.error(err);
-    process.exit(1);
-  });
+}
