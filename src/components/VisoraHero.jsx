@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Search,
   User,
@@ -11,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { useAuth } from '../lib/AuthContext.jsx';
 
 /**
  * Visora — Hero Landing
@@ -29,6 +31,8 @@ import {
 
 const VisoraHero = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const { session } = useAuth();
 
   const navLinks = [
     { name: 'Templates', delay: '100ms' },
@@ -93,6 +97,7 @@ const VisoraHero = () => {
           </button>
 
           <button
+            onClick={() => navigate(session ? '/dashboard' : '/login')}
             className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full liquid-glass hover:bg-white/10 transition-all animate-blur-fade-up cursor-pointer"
             style={{ animationDelay: '400ms' }}
             aria-label="Account"
@@ -149,7 +154,14 @@ const VisoraHero = () => {
               <Search className="w-[18px] h-[18px]" />
               <span>Search docs</span>
             </button>
-            <button className="flex items-center justify-center w-10 h-10 rounded-full liquid-glass">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate(session ? '/dashboard' : '/login');
+              }}
+              className="flex items-center justify-center w-10 h-10 rounded-full liquid-glass"
+              aria-label="Account"
+            >
               <User className="w-[18px] h-[18px]" />
             </button>
           </div>
@@ -195,15 +207,17 @@ const VisoraHero = () => {
 
             <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <button
+                onClick={() => navigate(session ? '/dashboard' : '/signup')}
                 className="bg-white text-black rounded-full font-medium px-6 sm:px-8 py-2.5 sm:py-3 flex items-center gap-2 hover:bg-gray-200 transition-colors animate-blur-fade-up cursor-pointer"
                 style={{ animationDelay: '600ms' }}
               >
-                <span>Get your API key</span>
+                <span>{session ? 'Go to dashboard' : 'Get your API key'}</span>
                 <ArrowRight className="w-[18px] h-[18px]" />
               </button>
               <button
                 className="rounded-full font-medium liquid-glass px-6 sm:px-8 py-2.5 sm:py-3 hover:bg-white/10 transition-colors animate-blur-fade-up cursor-pointer"
                 style={{ animationDelay: '700ms' }}
+                title="Docs page isn't built yet"
               >
                 Read the docs
               </button>
