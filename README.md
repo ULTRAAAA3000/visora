@@ -8,8 +8,8 @@ Chromium instead of an AI model guessing at pixels.
 
 - ✅ **Phase 1** — Cinematic hero landing UI (`src/components/VisoraHero.jsx`)
 - ✅ **Phase 2** — Supabase schema + render engine (`supabase/`, `worker/`)
-- ⬜ Phase 3 — Dashboard & billing integration
-- ⬜ Phase 4 — CI/CD & production deployment
+- ✅ **Phase 3** — Dashboard: auth, API key, template editor with live preview
+- ⬜ Phase 4 — CI/CD & production deployment polish, billing (Stripe/LemonSqueezy)
 
 ## Architecture (all on Cloudflare)
 
@@ -22,12 +22,16 @@ Chromium instead of an AI model guessing at pixels.
 ## Structure
 
 ```
-index.html                      Vite entry point
-src/main.jsx                    Mounts the hero page
-src/components/VisoraHero.jsx   Landing page hero component
-supabase/migrations/            Postgres schema + RLS policies
-worker/                         Cloudflare Worker render engine
-worker/wrangler.toml            Worker config: Browser Rendering + R2 bindings
+index.html                        Vite entry point
+src/main.jsx                      Router: landing, auth, dashboard
+src/components/VisoraHero.jsx     Landing page hero component
+src/lib/supabase.js               Supabase client (browser, anon key)
+src/lib/AuthContext.jsx           Auth session + profile (auto-creates on first login)
+src/pages/Login.jsx, Signup.jsx   Auth pages
+src/pages/dashboard/              Overview (API key/quota), Templates, TemplateEditor
+supabase/migrations/              Postgres schema + RLS policies
+worker/                           Cloudflare Worker render engine
+worker/wrangler.toml              Worker config: Browser Rendering + R2 bindings
 ```
 
 ## Frontend (Cloudflare Pages) setup
@@ -38,10 +42,16 @@ In the Pages project's **Settings → Build**, set:
 - **Build output directory**: `dist`
 - **Root directory**: `/` (repo root)
 
+In **Settings → Variables and secrets**, add (Production + Preview):
+
+- `VITE_SUPABASE_URL` — your Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` — your Supabase anon/public key (safe client-side; RLS is on)
+
 Local dev:
 
 ```bash
 npm install
+cp .env.example .env   # fill in your Supabase project URL + anon key
 npm run dev      # http://localhost:5173
 npm run build    # outputs to dist/
 ```
