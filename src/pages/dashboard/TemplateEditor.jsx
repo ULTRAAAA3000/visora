@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, Trash2, ArrowLeft } from 'lucide-react';
+import { Save, Trash2, ArrowLeft, Code2, ListChecks } from 'lucide-react';
 import { supabase } from '../../lib/supabase.js';
 
 function fillTemplate(htmlBody, variables) {
@@ -10,12 +10,34 @@ function fillTemplate(htmlBody, variables) {
   });
 }
 
+/** Extracts every unique {{key}} placeholder from an HTML template, in order of first appearance. */
+function extractVariableKeys(htmlBody) {
+  const keys = [];
+  const seen = new Set();
+  const regex = /{{\s*([\w.]+)\s*}}/g;
+  let match;
+  while ((match = regex.exec(htmlBody)) !== null) {
+    if (!seen.has(match[1])) {
+      seen.add(match[1]);
+      keys.push(match[1]);
+    }
+  }
+  return keys;
+}
+
+function humanizeKey(key) {
+  return key
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 export default function TemplateEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [template, setTemplate] = useState(null);
-  const [variablesText, setVariablesText] = useState('{}');
+  const [variableValues, setVariableValues] = useState({});
+  const [view, setView] = useState('fields'); // 'fields' | 'html'
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -33,7 +55,7 @@ export default function TemplateEditor() {
           setError(fetchError.message);
         } else {
           setTemplate(data);
-          setVariablesText(JSON.stringify(data.default_variables ?? {}, null, 2));
+          setVariableValues(data.default_variables ?? {});
         }
         setLoading(false);
       });
@@ -43,21 +65,19 @@ export default function TemplateEditor() {
     };
   }, [id]);
 
-  const parsedVariables = useMemo(() => {
-    try {
-      return { value: JSON.parse(variablesText), error: null };
-    } catch (e) {
-      return { value: {}, error: 'Invalid JSON' };
-    }
-  }, [variablesText]);
+  const variableKeys = useMemo(() => (template ? extractVariableKeys(template.html_body) : []), [template?.html_body]);
 
   const previewHtml = useMemo(() => {
     if (!template) return '';
-    return fillTemplate(template.html_body, parsedVariables.value);
-  }, [template, parsedVariables.value]);
+    return fillTemplate(template.html_body, variableValues);
+  }, [template, variableValues]);
+
+  const handleFieldChange = (key, value) => {
+    setVariableValues((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleSave = async () => {
-    if (!template || parsedVariables.error) return;
+    if (!template) return;
     setSaving(true);
     setError(null);
 
@@ -67,7 +87,7 @@ export default function TemplateEditor() {
         title: template.title,
         category: template.category,
         html_body: template.html_body,
-        default_variables: parsedVariables.value,
+        default_variables: variableValues,
         width: template.width,
         height: template.height,
       })
@@ -122,6 +142,28 @@ export default function TemplateEditor() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {/* Fields / HTML toggle */}
+          <div className="flex items-center bg-white/5 border border-white/10 rounded-lg p-0.5 mr-2">
+            <button
+              onClick={() => setView('fields')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                view === 'fields' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <ListChecks className="w-3.5 h-3.5" />
+              Fields
+            </button>
+            <button
+              onClick={() => setView('html')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                view === 'html' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <Code2 className="w-3.5 h-3.5" />
+              HTML
+            </button>
+          </div>
+
           {error && <span className="text-xs text-red-400">{error}</span>}
           <button
             onClick={handleDelete}
@@ -132,7 +174,7 @@ export default function TemplateEditor() {
           </button>
           <button
             onClick={handleSave}
-            disabled={saving || !!parsedVariables.error}
+            disabled={saving}
             className="flex items-center gap-2 bg-white text-black rounded-lg font-medium px-4 py-2 text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
@@ -142,30 +184,43 @@ export default function TemplateEditor() {
       </header>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-0">
-        <div className="flex flex-col border-r border-white/10 min-h-0">
-          <div className="flex-1 min-h-0 flex flex-col">
-            <p className="text-xs uppercase tracking-wide text-gray-500 px-4 pt-4 pb-2">HTML template</p>
-            <textarea
-              value={template.html_body}
-              onChange={(e) => setTemplate({ ...template, html_body: e.target.value })}
-              spellCheck={false}
-              className="flex-1 bg-black/40 text-gray-200 font-mono text-xs p-4 outline-none resize-none"
-            />
-          </div>
-          <div className="h-48 border-t border-white/10 flex flex-col shrink-0">
-            <p className="text-xs uppercase tracking-wide text-gray-500 px-4 pt-3 pb-2">
-              Default variables (JSON)
-            </p>
-            <textarea
-              value={variablesText}
-              onChange={(e) => setVariablesText(e.target.value)}
-              spellCheck={false}
-              className="flex-1 bg-black/40 text-gray-200 font-mono text-xs p-4 outline-none resize-none"
-            />
-            {parsedVariables.error && (
-              <p className="text-xs text-red-400 px-4 pb-2">{parsedVariables.error}</p>
-            )}
-          </div>
+        <div className="flex flex-col border-r border-white/10 min-h-0 overflow-y-auto">
+          {view === 'fields' ? (
+            <div className="p-6 space-y-5">
+              <p className="text-xs uppercase tracking-wide text-gray-500">
+                Fill in the blanks — the preview updates as you type.
+              </p>
+
+              {variableKeys.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  This template has no <code className="text-gray-400">{'{{variables}}'}</code> yet. Switch to
+                  the HTML tab to add some, e.g. <code className="text-gray-400">{'{{title}}'}</code>.
+                </p>
+              ) : (
+                variableKeys.map((key) => (
+                  <div key={key}>
+                    <label className="block text-sm text-gray-300 mb-1.5">{humanizeKey(key)}</label>
+                    <input
+                      value={variableValues[key] ?? ''}
+                      onChange={(e) => handleFieldChange(key, e.target.value)}
+                      className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-white/30 transition-colors"
+                      placeholder={key}
+                    />
+                  </div>
+                ))
+              )}
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col min-h-0">
+              <p className="text-xs uppercase tracking-wide text-gray-500 px-4 pt-4 pb-2">HTML template</p>
+              <textarea
+                value={template.html_body}
+                onChange={(e) => setTemplate({ ...template, html_body: e.target.value })}
+                spellCheck={false}
+                className="flex-1 bg-black/40 text-gray-200 font-mono text-xs p-4 outline-none resize-none min-h-[400px]"
+              />
+            </div>
+          )}
         </div>
 
         <div className="bg-[#0a0a0a] flex items-center justify-center p-6 overflow-auto min-h-0">
