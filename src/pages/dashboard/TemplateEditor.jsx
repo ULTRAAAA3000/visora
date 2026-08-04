@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, Trash2, ArrowLeft, Code2, ListChecks } from 'lucide-react';
+import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye } from 'lucide-react';
 import { supabase } from '../../lib/supabase.js';
 
 function fillTemplate(htmlBody, variables) {
@@ -26,9 +26,56 @@ function extractVariableKeys(htmlBody) {
 }
 
 function humanizeKey(key) {
-  return key
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * Renders the template's iframe scaled down to fit the available space,
+ * so a 1600×1131 certificate or 1400×1400 podcast cover previews fully
+ * on screen instead of forcing the user to scroll around it.
+ */
+function ScaledPreview({ html, width, height }) {
+  const containerRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const recalc = () => {
+      const { clientWidth, clientHeight } = el;
+      const nextScale = Math.min(clientWidth / width, clientHeight / height, 1);
+      setScale(nextScale > 0 ? nextScale : 1);
+    };
+
+    recalc();
+    const observer = new ResizeObserver(recalc);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [width, height]);
+
+  return (
+    <div ref={containerRef} className="w-full h-full flex items-center justify-center p-6">
+      <div
+        className="shadow-2xl shrink-0"
+        style={{ width: width * scale, height: height * scale }}
+      >
+        <iframe
+          title="Template preview"
+          srcDoc={html}
+          sandbox="allow-scripts"
+          style={{
+            width,
+            height,
+            transform: `scale(${scale})`,
+            transformOrigin: 'top left',
+            border: 0,
+          }}
+          className="bg-white"
+        />
+      </div>
+    </div>
+  );
 }
 
 export default function TemplateEditor() {
@@ -37,7 +84,7 @@ export default function TemplateEditor() {
 
   const [template, setTemplate] = useState(null);
   const [variableValues, setVariableValues] = useState({});
-  const [view, setView] = useState('fields'); // 'fields' | 'html'
+  const [view, setView] = useState('fields'); // 'fields' | 'html' | 'preview'
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -65,7 +112,10 @@ export default function TemplateEditor() {
     };
   }, [id]);
 
-  const variableKeys = useMemo(() => (template ? extractVariableKeys(template.html_body) : []), [template?.html_body]);
+  const variableKeys = useMemo(
+    () => (template ? extractVariableKeys(template.html_body) : []),
+    [template?.html_body]
+  );
 
   const previewHtml = useMemo(() => {
     if (!template) return '';
@@ -123,6 +173,12 @@ export default function TemplateEditor() {
     );
   }
 
+  const tabs = [
+    { id: 'fields', label: 'Fields', icon: ListChecks },
+    { id: 'html', label: 'HTML', icon: Code2 },
+    { id: 'preview', label: 'Preview', icon: Eye },
+  ];
+
   return (
     <div className="flex flex-col h-screen">
       <header className="flex items-center justify-between border-b border-white/10 px-6 py-3 shrink-0">
@@ -142,26 +198,19 @@ export default function TemplateEditor() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* Fields / HTML toggle */}
           <div className="flex items-center bg-white/5 border border-white/10 rounded-lg p-0.5 mr-2">
-            <button
-              onClick={() => setView('fields')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                view === 'fields' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <ListChecks className="w-3.5 h-3.5" />
-              Fields
-            </button>
-            <button
-              onClick={() => setView('html')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                view === 'html' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Code2 className="w-3.5 h-3.5" />
-              HTML
-            </button>
+            {tabs.map(({ id: tabId, label, icon: Icon }) => (
+              <button
+                key={tabId}
+                onClick={() => setView(tabId)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                  view === tabId ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </button>
+            ))}
           </div>
 
           {error && <span className="text-xs text-red-400">{error}</span>}
@@ -183,56 +232,51 @@ export default function TemplateEditor() {
         </div>
       </header>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 min-h-0">
-        <div className="flex flex-col border-r border-white/10 min-h-0 overflow-y-auto">
-          {view === 'fields' ? (
-            <div className="p-6 space-y-5">
-              <p className="text-xs uppercase tracking-wide text-gray-500">
-                Fill in the blanks — the preview updates as you type.
+      <div className="flex-1 min-h-0">
+        {view === 'fields' && (
+          <div className="h-full overflow-y-auto p-6 max-w-xl mx-auto space-y-5">
+            <p className="text-xs uppercase tracking-wide text-gray-500">
+              Fill in the blanks — switch to the Preview tab to see the result.
+            </p>
+
+            {variableKeys.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                This template has no <code className="text-gray-400">{'{{variables}}'}</code> yet. Switch to
+                the HTML tab to add some, e.g. <code className="text-gray-400">{'{{title}}'}</code>.
               </p>
+            ) : (
+              variableKeys.map((key) => (
+                <div key={key}>
+                  <label className="block text-sm text-gray-300 mb-1.5">{humanizeKey(key)}</label>
+                  <input
+                    value={variableValues[key] ?? ''}
+                    onChange={(e) => handleFieldChange(key, e.target.value)}
+                    className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-white/30 transition-colors"
+                    placeholder={key}
+                  />
+                </div>
+              ))
+            )}
+          </div>
+        )}
 
-              {variableKeys.length === 0 ? (
-                <p className="text-sm text-gray-500">
-                  This template has no <code className="text-gray-400">{'{{variables}}'}</code> yet. Switch to
-                  the HTML tab to add some, e.g. <code className="text-gray-400">{'{{title}}'}</code>.
-                </p>
-              ) : (
-                variableKeys.map((key) => (
-                  <div key={key}>
-                    <label className="block text-sm text-gray-300 mb-1.5">{humanizeKey(key)}</label>
-                    <input
-                      value={variableValues[key] ?? ''}
-                      onChange={(e) => handleFieldChange(key, e.target.value)}
-                      className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-white/30 transition-colors"
-                      placeholder={key}
-                    />
-                  </div>
-                ))
-              )}
-            </div>
-          ) : (
-            <div className="flex-1 flex flex-col min-h-0">
-              <p className="text-xs uppercase tracking-wide text-gray-500 px-4 pt-4 pb-2">HTML template</p>
-              <textarea
-                value={template.html_body}
-                onChange={(e) => setTemplate({ ...template, html_body: e.target.value })}
-                spellCheck={false}
-                className="flex-1 bg-black/40 text-gray-200 font-mono text-xs p-4 outline-none resize-none min-h-[400px]"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="bg-[#0a0a0a] flex items-center justify-center p-6 overflow-auto min-h-0">
-          <div className="shadow-2xl" style={{ width: template.width, height: template.height }}>
-            <iframe
-              title="Template preview"
-              srcDoc={previewHtml}
-              className="w-full h-full border-0 bg-white"
-              sandbox="allow-scripts"
+        {view === 'html' && (
+          <div className="h-full flex flex-col">
+            <p className="text-xs uppercase tracking-wide text-gray-500 px-6 pt-4 pb-2">HTML template</p>
+            <textarea
+              value={template.html_body}
+              onChange={(e) => setTemplate({ ...template, html_body: e.target.value })}
+              spellCheck={false}
+              className="flex-1 bg-black/40 text-gray-200 font-mono text-xs p-6 outline-none resize-none"
             />
           </div>
-        </div>
+        )}
+
+        {view === 'preview' && (
+          <div className="h-full bg-[#0a0a0a]">
+            <ScaledPreview html={previewHtml} width={template.width} height={template.height} />
+          </div>
+        )}
       </div>
     </div>
   );

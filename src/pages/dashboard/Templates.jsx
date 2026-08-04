@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FileCode2, Sparkles } from 'lucide-react';
+import { Plus, FileCode2, Sparkles, Lock } from 'lucide-react';
 import { useAuth } from '../../lib/AuthContext.jsx';
 import { supabase } from '../../lib/supabase.js';
 
@@ -12,6 +12,8 @@ export default function Templates() {
   const [myTemplates, setMyTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+
+  const isFreePlan = profile?.plan_tier === 'free';
 
   useEffect(() => {
     if (!profile) return;
@@ -66,6 +68,14 @@ export default function Templates() {
 
   const handleUsePreset = async (preset) => {
     if (!profile) return;
+
+    if (preset.is_premium && isFreePlan) {
+      alert(
+        'This is a premium template. Upgrade your plan to use it — billing isn\'t wired up yet, so consider this a preview of what\'s coming.'
+      );
+      return;
+    }
+
     setBusyId(preset.id);
 
     const { data, error } = await supabase
@@ -112,25 +122,43 @@ export default function Templates() {
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {presets.map((tpl) => (
-            <button
-              key={tpl.id}
-              onClick={() => handleUsePreset(tpl)}
-              disabled={busyId === tpl.id}
-              className="text-left rounded-2xl border border-white/10 bg-white/[0.03] p-5 hover:bg-white/[0.06] transition-colors disabled:opacity-50"
-            >
-              <div className="aspect-[4/3] rounded-lg bg-black/40 border border-white/10 mb-4 flex items-center justify-center">
-                <FileCode2 className="w-6 h-6 text-gray-600" />
-              </div>
-              <h2 className="font-medium mb-1">{tpl.title}</h2>
-              <p className="text-xs text-gray-500">
-                {tpl.category} · {tpl.width}×{tpl.height}
-              </p>
-              <span className="inline-block mt-3 text-xs text-white underline underline-offset-2">
-                {busyId === tpl.id ? 'Creating…' : 'Use this template'}
-              </span>
-            </button>
-          ))}
+          {presets.map((tpl) => {
+            const locked = tpl.is_premium && isFreePlan;
+            return (
+              <button
+                key={tpl.id}
+                onClick={() => handleUsePreset(tpl)}
+                disabled={busyId === tpl.id}
+                className={`text-left rounded-2xl border p-5 transition-colors disabled:opacity-50 relative ${
+                  locked
+                    ? 'border-amber-400/20 bg-amber-400/[0.03] hover:bg-amber-400/[0.06]'
+                    : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]'
+                }`}
+              >
+                {tpl.is_premium && (
+                  <span className="absolute top-4 right-4 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-amber-400 bg-amber-400/10 border border-amber-400/30 rounded-full px-2 py-0.5">
+                    {locked && <Lock className="w-2.5 h-2.5" />}
+                    Pro
+                  </span>
+                )}
+
+                <div className="aspect-[4/3] rounded-lg bg-black/40 border border-white/10 mb-4 flex items-center justify-center">
+                  <FileCode2 className="w-6 h-6 text-gray-600" />
+                </div>
+                <h2 className="font-medium mb-1 pr-10">{tpl.title}</h2>
+                <p className="text-xs text-gray-500">
+                  {tpl.category} · {tpl.width}×{tpl.height}
+                </p>
+                <span
+                  className={`inline-block mt-3 text-xs underline underline-offset-2 ${
+                    locked ? 'text-amber-400' : 'text-white'
+                  }`}
+                >
+                  {busyId === tpl.id ? 'Creating…' : locked ? 'Upgrade to unlock' : 'Use this template'}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
