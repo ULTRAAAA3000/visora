@@ -29,14 +29,14 @@ export default function MarqueeSection() {
   return (
     <section ref={sectionRef} className="bg-black pt-24 sm:pt-32 md:pt-40 pb-10 overflow-hidden">
       <div className="flex flex-col gap-3">
-        <div className="flex gap-3" style={{ willChange: 'transform', transform: `translateX(${offset - 200}px)` }}>
+        <div className="flex gap-2 sm:gap-3" style={{ willChange: 'transform', transform: `translateX(${offset - 200}px)` }}>
           {tripled(ROW_1).map((variant, i) => (
-            <TemplateMockup key={i} variant={variant} className="w-[420px] h-[270px] shrink-0" />
+            <TemplateMockup key={i} variant={variant} className="w-[220px] h-[142px] sm:w-[320px] sm:h-[206px] md:w-[420px] md:h-[270px] shrink-0" />
           ))}
         </div>
-        <div className="flex gap-3" style={{ willChange: 'transform', transform: `translateX(${-(offset - 200)}px)` }}>
+        <div className="flex gap-2 sm:gap-3" style={{ willChange: 'transform', transform: `translateX(${-(offset - 200)}px)` }}>
           {tripled(ROW_2).map((variant, i) => (
-            <TemplateMockup key={i} variant={variant} className="w-[420px] h-[270px] shrink-0" />
+            <TemplateMockup key={i} variant={variant} className="w-[220px] h-[142px] sm:w-[320px] sm:h-[206px] md:w-[420px] md:h-[270px] shrink-0" />
           ))}
         </div>
       </div>
