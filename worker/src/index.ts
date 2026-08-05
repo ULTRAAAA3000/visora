@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { nanoid } from 'nanoid';
 
-import { authenticate, json } from './lib/auth.js';
-import { fillTemplate, renderHtmlToImage } from './lib/render.js';
+import { authenticate, json } from './lib/auth';
+import { fillTemplate, renderHtmlToImage, type TemplateVariables } from './lib/render';
+import type { Env } from './env';
 
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     if (url.pathname === '/health') {
@@ -34,9 +35,15 @@ export default {
 
     return new Response('Not found', { status: 404 });
   },
-};
+} satisfies ExportedHandler<Env>;
 
-async function handleRender(request, env, ctx, url) {
+interface RenderRequestBody {
+  template_id?: string;
+  format?: 'png' | 'jpeg';
+  data?: TemplateVariables;
+}
+
+async function handleRender(request: Request, env: Env, ctx: ExecutionContext, url: URL): Promise<Response> {
   const startedAt = Date.now();
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -44,7 +51,7 @@ async function handleRender(request, env, ctx, url) {
   if (auth.error) return auth.error;
   const { profile } = auth;
 
-  let body;
+  let body: RenderRequestBody;
   try {
     body = await request.json();
   } catch {
@@ -68,7 +75,7 @@ async function handleRender(request, env, ctx, url) {
 
   const html = fillTemplate(template.html_body, data, template.default_variables ?? {});
 
-  let imageBuffer;
+  let imageBuffer: Uint8Array;
   try {
     imageBuffer = await renderHtmlToImage(env.MYBROWSER, {
       html,

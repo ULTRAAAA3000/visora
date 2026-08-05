@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   User,
@@ -12,7 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { useAuth } from '../lib/AuthContext.jsx';
+import { useAuth } from '../lib/AuthContext';
 
 /**
  * Visora — Hero Landing
@@ -29,12 +29,17 @@ import { useAuth } from '../lib/AuthContext.jsx';
  *    words with ones a developer evaluating this tool would actually read.
  */
 
-const VisoraHero = () => {
+interface NavLink {
+  name: string;
+  delay: string;
+}
+
+const VisoraHero: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { session } = useAuth();
 
-  const navLinks = [
+  const navLinks: NavLink[] = [
     { name: 'Templates', delay: '100ms' },
     { name: 'Docs', delay: '150ms' },
     { name: 'Pricing', delay: '200ms' },

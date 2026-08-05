@@ -1,8 +1,19 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from './supabase.js';
-import { generateApiKey } from './apiKey.js';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import type { Session, User } from '@supabase/supabase-js';
+import { supabase } from './supabase';
+import { generateApiKey } from './apiKey';
+import type { Profile } from './database.types';
 
-const AuthContext = createContext(undefined);
+interface AuthContextValue {
+  session: Session | null;
+  user: User | null;
+  profile: Profile | null;
+  loading: boolean;
+  refreshProfile: () => Promise<void>;
+  signOut: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 /**
  * Ensures a `profiles` row exists for the given auth user. New signups
@@ -10,7 +21,7 @@ const AuthContext = createContext(undefined);
  * dashboard creates it on first load using the INSERT policy added in
  * migration 0002.
  */
-async function ensureProfile(user) {
+async function ensureProfile(user: User): Promise<Profile> {
   const { data: existing, error: selectError } = await supabase
     .from('profiles')
     .select('*')
@@ -24,7 +35,7 @@ async function ensureProfile(user) {
     .from('profiles')
     .insert({
       id: user.id,
-      email: user.email,
+      email: user.email ?? '',
       api_key: generateApiKey(),
     })
     .select()
@@ -34,9 +45,9 @@ async function ensureProfile(user) {
   return created;
 }
 
-export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
-  const [profile, setProfile] = useState(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -85,14 +96,23 @@ export function AuthProvider({ children }) {
     if (!error) setProfile(data);
   };
 
-  const signOut = () => supabase.auth.signOut();
+  const signOut = async () => {
+    await supabase.auth.signOut();
+  };
 
-  const value = { session, user: session?.user ?? null, profile, loading, refreshProfile, signOut };
+  const value: AuthContextValue = {
+    session,
+    user: session?.user ?? null,
+    profile,
+    loading,
+    refreshProfile,
+    signOut,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
   return ctx;

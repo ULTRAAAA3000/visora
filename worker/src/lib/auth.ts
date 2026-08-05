@@ -1,9 +1,21 @@
-export function json(body, status = 200) {
+import type { SupabaseClient } from '@supabase/supabase-js';
+
+export function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { 'content-type': 'application/json' },
   });
 }
+
+interface AuthenticatedProfile {
+  id: string;
+  email: string;
+  plan_tier: string;
+  monthly_quota: number;
+  usage_this_month: number;
+}
+
+type AuthResult = { profile: AuthenticatedProfile; error?: undefined } | { profile?: undefined; error: Response };
 
 /**
  * Validates the `Authorization: Bearer VISORA_LIVE_KEY_...` header against
@@ -12,7 +24,7 @@ export function json(body, status = 200) {
  * Returns { profile } on success, or { error: Response } to short-circuit
  * the request with an already-built error response.
  */
-export async function authenticate(request, supabase) {
+export async function authenticate(request: Request, supabase: SupabaseClient): Promise<AuthResult> {
   const authHeader = request.headers.get('Authorization') || '';
   const [scheme, token] = authHeader.split(' ');
 

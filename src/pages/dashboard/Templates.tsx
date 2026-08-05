@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, FileCode2, Sparkles, Lock } from 'lucide-react';
-import { useAuth } from '../../lib/AuthContext.jsx';
-import { supabase } from '../../lib/supabase.js';
+import { useAuth } from '../../lib/AuthContext';
+import { supabase } from '../../lib/supabase';
+import type { Template } from '../../lib/database.types';
 
 export default function Templates() {
   const { profile } = useAuth();
   const navigate = useNavigate();
 
-  const [presets, setPresets] = useState([]);
-  const [myTemplates, setMyTemplates] = useState([]);
+  const [presets, setPresets] = useState<Template[]>([]);
+  const [myTemplates, setMyTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId] = useState(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const isFreePlan = profile?.plan_tier === 'free';
 
@@ -66,7 +67,7 @@ export default function Templates() {
     navigate(`/dashboard/templates/${data.id}`);
   };
 
-  const handleUsePreset = async (preset) => {
+  const handleUsePreset = async (preset: Template) => {
     if (!profile) return;
 
     if (preset.is_premium && isFreePlan) {

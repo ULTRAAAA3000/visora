@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Copy, Check, RefreshCw } from 'lucide-react';
-import { useAuth } from '../../lib/AuthContext.jsx';
-import { supabase } from '../../lib/supabase.js';
-import { generateApiKey } from '../../lib/apiKey.js';
+import { useAuth } from '../../lib/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { generateApiKey } from '../../lib/apiKey';
 
 export default function Overview() {
   const { profile, refreshProfile } = useAuth();
   const [copied, setCopied] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   if (!profile) {
     return (

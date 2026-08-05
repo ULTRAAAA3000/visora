@@ -1,9 +1,16 @@
-import React from 'react';
+import { type ComponentType } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { LayoutDashboard, FileCode2, LogOut } from 'lucide-react';
-import { useAuth } from '../../lib/AuthContext.jsx';
+import { useAuth } from '../../lib/AuthContext';
 
-const navItems = [
+interface NavItem {
+  to: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  end?: boolean;
+}
+
+const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/dashboard/templates', label: 'Templates', icon: FileCode2 },
 ];

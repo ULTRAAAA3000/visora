@@ -6,15 +6,16 @@ Chromium instead of an AI model guessing at pixels.
 
 ## Status
 
-- ✅ **Phase 1** — Cinematic hero landing UI (`src/components/VisoraHero.jsx`)
+- ✅ **Phase 1** — Cinematic hero landing UI (`src/components/VisoraHero.tsx`)
 - ✅ **Phase 2** — Supabase schema + render engine (`supabase/`, `worker/`)
 - ✅ **Phase 3** — Dashboard: auth, API key, template editor with live preview
-- ⬜ Phase 4 — CI/CD & production deployment polish, billing (Stripe/LemonSqueezy)
+- ✅ Fully TypeScript (frontend + Worker) — see "Type safety" below
+- ⬜ Phase 4 — CI/CD & production deployment polish, billing (LemonSqueezy)
 
 ## Architecture (all on Cloudflare)
 
-- **Frontend** — Cloudflare **Pages** (`src/`)
-- **Render API** — Cloudflare **Worker** (`worker/`), using the
+- **Frontend** — Cloudflare **Pages** (`src/`), Vite + React + TypeScript
+- **Render API** — Cloudflare **Worker** (`worker/`), TypeScript, using the
   [Browser Rendering](https://developers.cloudflare.com/browser-rendering/)
   binding to drive real headless Chromium and **R2** to store output images
 - **Database / Auth** — Supabase (Postgres + Row Level Security)
@@ -23,16 +24,41 @@ Chromium instead of an AI model guessing at pixels.
 
 ```
 index.html                        Vite entry point
-src/main.jsx                      Router: landing, auth, dashboard
-src/components/VisoraHero.jsx     Landing page hero component
-src/lib/supabase.js               Supabase client (browser, anon key)
-src/lib/AuthContext.jsx           Auth session + profile (auto-creates on first login)
-src/pages/Login.jsx, Signup.jsx   Auth pages
+src/main.tsx                      Router: landing, auth, dashboard
+src/components/VisoraHero.tsx     Landing page hero component
+src/lib/supabase.ts               Supabase client (browser, anon key), typed via database.types.ts
+src/lib/database.types.ts         Hand-written types mirroring supabase/migrations/*.sql
+src/lib/AuthContext.tsx           Auth session + profile (auto-creates on first login)
+src/pages/Login.tsx, Signup.tsx   Auth pages
 src/pages/dashboard/              Overview (API key/quota), Templates, TemplateEditor
 supabase/migrations/              Postgres schema + RLS policies
-worker/                           Cloudflare Worker render engine
+worker/                           Cloudflare Worker render engine (TypeScript)
+worker/src/env.ts                 Env interface for Worker bindings
 worker/wrangler.toml              Worker config: Browser Rendering + R2 bindings
 ```
+
+## Type safety
+
+Both the frontend and the Worker are TypeScript. Two non-obvious things
+worth knowing if you touch `src/lib/database.types.ts`:
+
+1. **Insert/Update types are explicit object literals**, not derived via
+   `Partial<Row> & Pick<...>`. supabase-js's generic constraint resolution
+   doesn't reliably simplify intersection types through its internal
+   conditional-type chain — using one silently collapses every
+   `.insert()`/`.update()` call's argument type to `never` instead of
+   erroring, which is easy to miss.
+2. **Row/Insert/Update are `type` aliases, not `interface`.** Interfaces
+   break the same constraint resolution for reasons that don't reduce to
+   a one-line explanation (declaration-merging semantics colliding with
+   supabase-js's deeply nested conditional `Schema` type), even though
+   they're structurally identical to the equivalent `type`. This is the
+   same shape `supabase gen types typescript` generates, for the same
+   reason — so if the schema changes enough that hand-maintaining this
+   gets tedious, generating instead of hand-writing is the way out.
+
+`npm run typecheck` (frontend) and `cd worker && npm run typecheck`
+(Worker) run `tsc --noEmit` on their own.
 
 ## Frontend (Cloudflare Pages) setup
 

@@ -2,20 +2,23 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import { AuthProvider } from './lib/AuthContext.jsx';
-import ProtectedRoute from './components/ProtectedRoute.jsx';
+import { AuthProvider } from './lib/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
-import VisoraHero from './components/VisoraHero.jsx';
-import Login from './pages/Login.jsx';
-import Signup from './pages/Signup.jsx';
-import DashboardLayout from './pages/dashboard/DashboardLayout.jsx';
-import Overview from './pages/dashboard/Overview.jsx';
-import Templates from './pages/dashboard/Templates.jsx';
-import TemplateEditor from './pages/dashboard/TemplateEditor.jsx';
+import VisoraHero from './components/VisoraHero';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import DashboardLayout from './pages/dashboard/DashboardLayout';
+import Overview from './pages/dashboard/Overview';
+import Templates from './pages/dashboard/Templates';
+import TemplateEditor from './pages/dashboard/TemplateEditor';
 
 import './index.css';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('#root element not found in index.html');
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>

@@ -1,21 +1,25 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye } from 'lucide-react';
-import { supabase } from '../../lib/supabase.js';
+import { supabase } from '../../lib/supabase';
+import type { Template } from '../../lib/database.types';
 
-function fillTemplate(htmlBody, variables) {
-  return htmlBody.replace(/{{\s*([\w.]+)\s*}}/g, (_match, key) => {
+type VariableValues = Record<string, string>;
+type View = 'fields' | 'html' | 'preview';
+
+function fillTemplate(htmlBody: string, variables: VariableValues): string {
+  return htmlBody.replace(/{{\s*([\w.]+)\s*}}/g, (_match, key: string) => {
     const value = variables[key];
     return value === undefined || value === null ? '' : String(value);
   });
 }
 
 /** Extracts every unique {{key}} placeholder from an HTML template, in order of first appearance. */
-function extractVariableKeys(htmlBody) {
-  const keys = [];
-  const seen = new Set();
+function extractVariableKeys(htmlBody: string): string[] {
+  const keys: string[] = [];
+  const seen = new Set<string>();
   const regex = /{{\s*([\w.]+)\s*}}/g;
-  let match;
+  let match: RegExpExecArray | null;
   while ((match = regex.exec(htmlBody)) !== null) {
     if (!seen.has(match[1])) {
       seen.add(match[1]);
@@ -25,7 +29,7 @@ function extractVariableKeys(htmlBody) {
   return keys;
 }
 
-function humanizeKey(key) {
+function humanizeKey(key: string): string {
   return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
@@ -34,8 +38,8 @@ function humanizeKey(key) {
  * so a 1600×1131 certificate or 1400×1400 podcast cover previews fully
  * on screen instead of forcing the user to scroll around it.
  */
-function ScaledPreview({ html, width, height }) {
-  const containerRef = useRef(null);
+function ScaledPreview({ html, width, height }: { html: string; width: number; height: number }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
@@ -56,10 +60,7 @@ function ScaledPreview({ html, width, height }) {
 
   return (
     <div ref={containerRef} className="w-full h-full flex items-center justify-center p-6">
-      <div
-        className="shadow-2xl shrink-0"
-        style={{ width: width * scale, height: height * scale }}
-      >
+      <div className="shadow-2xl shrink-0" style={{ width: width * scale, height: height * scale }}>
         <iframe
           title="Template preview"
           srcDoc={html}
@@ -78,18 +79,25 @@ function ScaledPreview({ html, width, height }) {
   );
 }
 
+interface Tab {
+  id: View;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+}
+
 export default function TemplateEditor() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [template, setTemplate] = useState(null);
-  const [variableValues, setVariableValues] = useState({});
-  const [view, setView] = useState('fields'); // 'fields' | 'html' | 'preview'
+  const [template, setTemplate] = useState<Template | null>(null);
+  const [variableValues, setVariableValues] = useState<VariableValues>({});
+  const [view, setView] = useState<View>('fields');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!id) return;
     let isMounted = true;
     supabase
       .from('templates')
@@ -100,7 +108,7 @@ export default function TemplateEditor() {
         if (!isMounted) return;
         if (fetchError) {
           setError(fetchError.message);
-        } else {
+        } else if (data) {
           setTemplate(data);
           setVariableValues(data.default_variables ?? {});
         }
@@ -122,12 +130,12 @@ export default function TemplateEditor() {
     return fillTemplate(template.html_body, variableValues);
   }, [template, variableValues]);
 
-  const handleFieldChange = (key, value) => {
+  const handleFieldChange = (key: string, value: string) => {
     setVariableValues((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = async () => {
-    if (!template) return;
+    if (!template || !id) return;
     setSaving(true);
     setError(null);
 
@@ -148,6 +156,7 @@ export default function TemplateEditor() {
   };
 
   const handleDelete = async () => {
+    if (!id) return;
     if (!confirm('Delete this template? This cannot be undone.')) return;
     const { error: deleteError } = await supabase.from('templates').delete().eq('id', id);
     if (deleteError) {
@@ -173,7 +182,7 @@ export default function TemplateEditor() {
     );
   }
 
-  const tabs = [
+  const tabs: Tab[] = [
     { id: 'fields', label: 'Fields', icon: ListChecks },
     { id: 'html', label: 'HTML', icon: Code2 },
     { id: 'preview', label: 'Preview', icon: Eye },
