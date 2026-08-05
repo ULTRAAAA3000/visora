@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './lib/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
-import VisoraHero from './components/VisoraHero';
+import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
@@ -23,7 +23,7 @@ ReactDOM.createRoot(rootElement).render(
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<VisoraHero />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
