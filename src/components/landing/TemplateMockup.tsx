@@ -41,10 +41,23 @@ function Quote() {
 
 function Podcast() {
   return (
-    <div className="w-full h-full bg-[#121212] p-5 flex flex-col justify-between">
-      <span className="text-white/80 text-[9px] font-bold uppercase tracking-widest">Build in Public</span>
-      <div className="flex items-end gap-[3px] h-8">
-        {[35, 70, 45, 90, 55, 30, 80, 50].map((h, i) => (
+    <div className="w-full h-full bg-[#121212] p-5 flex flex-col justify-between relative overflow-hidden">
+      <div
+        className="absolute inset-0"
+        style={{ background: 'radial-gradient(circle at 80% -10%, rgba(255,90,95,0.28), transparent 60%)' }}
+      />
+
+      <div className="relative flex items-center justify-between">
+        <span className="text-white/80 text-[9px] font-bold uppercase tracking-widest">Build in Public</span>
+        <span className="flex items-center justify-center w-7 h-7 rounded-full border border-[#FF5A5F] text-[#FF5A5F] text-[8px] font-black shrink-0">
+          42
+        </span>
+      </div>
+
+      <p className="relative text-white text-sm font-black leading-tight">Shipping a micro-SaaS in a weekend</p>
+
+      <div className="relative flex items-end gap-[3px] h-10">
+        {[35, 70, 45, 90, 55, 30, 80, 50, 60, 40].map((h, i) => (
           <div key={i} className={`w-[4px] rounded-full ${i % 3 === 0 ? 'bg-white/80' : 'bg-[#FF5A5F]'}`} style={{ height: `${h}%` }} />
         ))}
       </div>
