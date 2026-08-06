@@ -1,5 +1,5 @@
 === Visora Connect ===
-Contributors: visora
+Contributors: ultraaaa3000
 Tags: og image, social image, image generation, banner, certificate
 Requires at least: 5.8
 Tested up to: 6.6

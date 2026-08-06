@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Visora Connect
- * Plugin URI:        https://visora.io
+ * Plugin URI:        https://github.com/ULTRAAAA3000/visora/tree/main/integrations/wordpress-plugin/visora-connect
  * Description:       Connect your WordPress site to Visora and render pixel-perfect OG images, product banners, and certificates from HTML/Tailwind templates — no AI image guessing, real headless Chromium.
  * Version:           1.0.0
  * Requires at least: 5.8
