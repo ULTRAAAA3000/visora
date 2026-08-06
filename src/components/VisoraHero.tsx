@@ -72,7 +72,7 @@ const VisoraHero: React.FC = () => {
       <header className="relative z-50 flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 md:py-6 w-full">
         {/* Left: VISORA Logo */}
         <div className="animate-blur-fade-up" style={{ animationDelay: '0ms' }}>
-          <a href="#" className="block h-8 md:h-10">
+          <a href="#" className="block h-10 sm:h-12 md:h-14">
             <img src="/visora-logo.png" alt="Visora" className="h-full w-auto object-contain" />
           </a>
         </div>
