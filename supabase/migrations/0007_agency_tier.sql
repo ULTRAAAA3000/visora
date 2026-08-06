@@ -11,6 +11,11 @@ ALTER TABLE public.templates
 -- Backfill from the old is_premium flag before dropping it.
 UPDATE public.templates SET tier = 'pro' WHERE is_premium = TRUE;
 
+-- The old SELECT policy references is_premium in its USING clause, so it
+-- must be dropped BEFORE the column — otherwise Postgres refuses with
+-- "cannot drop column is_premium ... other objects depend on it".
+DROP POLICY IF EXISTS "Anyone can read own templates or unlocked presets" ON public.templates;
+
 ALTER TABLE public.templates DROP COLUMN is_premium;
 
 CREATE INDEX IF NOT EXISTS idx_templates_tier ON public.templates(tier);
@@ -18,8 +23,6 @@ CREATE INDEX IF NOT EXISTS idx_templates_tier ON public.templates(tier);
 -- Replace the SELECT policy: free tier always visible; 'pro' unlocks for
 -- plan_tier IN ('pro','agency'); 'agency' unlocks ONLY for plan_tier =
 -- 'agency' (exclusive, not inherited by 'pro').
-DROP POLICY IF EXISTS "Anyone can read own templates or unlocked presets" ON public.templates;
-
 CREATE POLICY "Anyone can read own templates or unlocked presets"
   ON public.templates FOR SELECT
   USING (
