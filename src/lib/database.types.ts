@@ -33,7 +33,7 @@ export type Template = {
   id: string;
   user_id: string | null;
   is_preset: boolean;
-  is_premium: boolean;
+  tier: 'free' | 'pro' | 'agency';
   title: string;
   category: string;
   html_body: string;
@@ -84,7 +84,7 @@ export type Database = {
           id?: string;
           user_id?: string | null;
           is_preset?: boolean;
-          is_premium?: boolean;
+          tier?: Template['tier'];
           title: string;
           category: string;
           html_body: string;
@@ -97,7 +97,7 @@ export type Database = {
           id?: string;
           user_id?: string | null;
           is_preset?: boolean;
-          is_premium?: boolean;
+          tier?: Template['tier'];
           title?: string;
           category?: string;
           html_body?: string;

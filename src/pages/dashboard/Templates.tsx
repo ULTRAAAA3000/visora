@@ -1,20 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FileCode2, Sparkles, Lock } from 'lucide-react';
+import { Plus, FileCode2, Sparkles, Lock, Crown } from 'lucide-react';
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
 import type { Template } from '../../lib/database.types';
+
+function isLocked(tier: Template['tier'], planTier: string | undefined) {
+  if (tier === 'free') return false;
+  if (tier === 'pro') return planTier !== 'pro' && planTier !== 'agency';
+  return planTier !== 'agency'; // tier === 'agency'
+}
 
 export default function Templates() {
   const { profile } = useAuth();
   const navigate = useNavigate();
 
+  const [agencyPresets, setAgencyPresets] = useState<Template[]>([]);
   const [presets, setPresets] = useState<Template[]>([]);
   const [myTemplates, setMyTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
-
-  const isFreePlan = profile?.plan_tier === 'free';
 
   useEffect(() => {
     if (!profile) return;
@@ -29,7 +34,8 @@ export default function Templates() {
         if (!isMounted) return;
         if (error) console.error(error);
         const all = data ?? [];
-        setPresets(all.filter((t) => t.is_preset));
+        setAgencyPresets(all.filter((t) => t.is_preset && t.tier === 'agency'));
+        setPresets(all.filter((t) => t.is_preset && t.tier !== 'agency'));
         setMyTemplates(all.filter((t) => !t.is_preset));
         setLoading(false);
       });
@@ -70,9 +76,10 @@ export default function Templates() {
   const handleUsePreset = async (preset: Template) => {
     if (!profile) return;
 
-    if (preset.is_premium && isFreePlan) {
+    if (isLocked(preset.tier, profile.plan_tier)) {
+      const need = preset.tier === 'agency' ? 'Agency' : 'Pro';
       alert(
-        'This is a premium template. Upgrade your plan to use it — billing isn\'t wired up yet, so consider this a preview of what\'s coming.'
+        `This is a ${need}-tier template. Upgrade your plan to use it — billing isn't wired up yet, so consider this a preview of what's coming.`
       );
       return;
     }
@@ -112,6 +119,49 @@ export default function Templates() {
 
   return (
     <div className="p-8 max-w-5xl">
+      {/* Agency Exclusive */}
+      {agencyPresets.length > 0 && (
+        <div className="mb-14">
+          <div className="flex items-center gap-2 mb-1">
+            <Crown className="w-4 h-4 text-amber-400" />
+            <h1 className="text-xl font-medium">Agency Exclusive</h1>
+          </div>
+          <p className="text-gray-400 text-sm mb-6">
+            Our most refined templates, reserved for the Agency plan.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {agencyPresets.map((tpl) => {
+              const locked = isLocked(tpl.tier, profile?.plan_tier);
+              return (
+                <button
+                  key={tpl.id}
+                  onClick={() => handleUsePreset(tpl)}
+                  disabled={busyId === tpl.id}
+                  className="text-left rounded-2xl p-5 transition-colors disabled:opacity-50 relative border border-amber-400/30 bg-gradient-to-b from-amber-400/[0.08] to-transparent hover:from-amber-400/[0.14]"
+                >
+                  <span className="absolute top-4 right-4 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-amber-400 bg-amber-400/10 border border-amber-400/30 rounded-full px-2 py-0.5">
+                    {locked && <Lock className="w-2.5 h-2.5" />}
+                    Agency
+                  </span>
+
+                  <div className="aspect-[4/3] rounded-lg bg-black/40 border border-amber-400/20 mb-4 flex items-center justify-center">
+                    <Crown className="w-6 h-6 text-amber-400/60" />
+                  </div>
+                  <h2 className="font-medium mb-1 pr-14">{tpl.title}</h2>
+                  <p className="text-xs text-gray-500">
+                    {tpl.category} · {tpl.width}×{tpl.height}
+                  </p>
+                  <span className="inline-block mt-3 text-xs underline underline-offset-2 text-amber-400">
+                    {busyId === tpl.id ? 'Creating…' : locked ? 'Upgrade to unlock' : 'Use this template'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Presets gallery */}
       <div className="mb-12">
         <div className="flex items-center gap-2 mb-1">
@@ -124,7 +174,7 @@ export default function Templates() {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {presets.map((tpl) => {
-            const locked = tpl.is_premium && isFreePlan;
+            const locked = isLocked(tpl.tier, profile?.plan_tier);
             return (
               <button
                 key={tpl.id}
@@ -136,7 +186,7 @@ export default function Templates() {
                     : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]'
                 }`}
               >
-                {tpl.is_premium && (
+                {tpl.tier === 'pro' && (
                   <span className="absolute top-4 right-4 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-amber-400 bg-amber-400/10 border border-amber-400/30 rounded-full px-2 py-0.5">
                     {locked && <Lock className="w-2.5 h-2.5" />}
                     Pro
