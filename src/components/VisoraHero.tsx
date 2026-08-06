@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -36,8 +36,16 @@ interface NavLink {
 
 const VisoraHero: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const { session } = useAuth();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const navLinks: NavLink[] = [
     { name: 'Templates', delay: '100ms' },
@@ -69,10 +77,14 @@ const VisoraHero: React.FC = () => {
       />
 
       {/* NAVBAR */}
-      <header className="relative z-50 flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 md:py-6 w-full">
+      <header
+        className={`fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 md:py-6 w-full transition-all duration-500 ${
+          scrolled ? 'bg-black/70 backdrop-blur-xl border-b border-white/10' : 'bg-transparent border-b border-transparent'
+        }`}
+      >
         {/* Left: VISORA Logo */}
         <div className="animate-blur-fade-up" style={{ animationDelay: '0ms' }}>
-          <a href="#" className="block h-10 sm:h-12 md:h-14">
+          <a href="#" className="block h-10 sm:h-12 md:h-14 transition-transform duration-300 hover:scale-105">
             <img src="/visora-logo.png" alt="Visora" className="h-full w-auto object-contain" />
           </a>
         </div>
@@ -83,10 +95,11 @@ const VisoraHero: React.FC = () => {
             <a
               key={link.name}
               href={`#${link.name.toLowerCase().replace(/\s+/g, '-')}`}
-              className="text-sm text-white hover:text-gray-300 transition-colors animate-blur-fade-up"
+              className="group relative text-sm text-white hover:text-gray-300 transition-colors animate-blur-fade-up"
               style={{ animationDelay: link.delay }}
             >
               {link.name}
+              <span className="absolute left-0 -bottom-1.5 h-px w-0 bg-white transition-all duration-300 ease-out group-hover:w-full" />
             </a>
           ))}
         </nav>

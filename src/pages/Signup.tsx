@@ -43,7 +43,7 @@ export default function Signup() {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
         <div className="w-full max-w-sm text-center">
-          <img src="/visora-logo.png" alt="Visora" className="h-8 mx-auto mb-8" />
+          <img src="/visora-logo.png" alt="Visora" className="h-10 sm:h-12 md:h-14 mx-auto mb-8" />
           <h1 className="text-xl font-medium mb-3">Check your email</h1>
           <p className="text-gray-400 text-sm">
             We sent a confirmation link to <span className="text-white">{email}</span>. Click it to
@@ -61,7 +61,7 @@ export default function Signup() {
     <div className="min-h-screen bg-black text-white flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <Link to="/" className="block text-center mb-8">
-          <img src="/visora-logo.png" alt="Visora" className="h-8 mx-auto" />
+          <img src="/visora-logo.png" alt="Visora" className="h-10 sm:h-12 md:h-14 mx-auto" />
         </Link>
 
         <div className="rounded-2xl p-8 bg-white/[0.03] border border-white/10">

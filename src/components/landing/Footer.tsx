@@ -48,7 +48,7 @@ export default function Footer() {
       {/* Link columns */}
       <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-6 pb-16 border-b border-white/10">
         <div className="col-span-2 sm:col-span-1">
-          <img src="/visora-logo.png" alt="Visora" className="h-6 mb-4" />
+          <img src="/visora-logo.png" alt="Visora" className="h-10 sm:h-12 md:h-14 mb-4" />
           <p className="text-[#D7E2EA]/50 text-sm max-w-[220px]">
             Pixel-perfect image rendering for developers — real Chromium, one API call.
           </p>

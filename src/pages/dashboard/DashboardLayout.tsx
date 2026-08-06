@@ -23,7 +23,7 @@ export default function DashboardLayout() {
       <aside className="w-60 shrink-0 border-r border-white/10 flex flex-col justify-between py-6 px-4">
         <div>
           <Link to="/" className="block px-2 mb-8">
-            <img src="/visora-logo.png" alt="Visora" className="h-6" />
+            <img src="/visora-logo.png" alt="Visora" className="h-10 sm:h-12 md:h-14" />
           </Link>
 
           <nav className="space-y-1">
