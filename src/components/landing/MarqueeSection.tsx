@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import TemplateMockup, { type MockupVariant } from './TemplateMockup';
+import BrowserFrame from './BrowserFrame';
 
 const ROW_1: MockupVariant[] = ['certificate', 'quote', 'podcast', 'pricing', 'invoice', 'wedding', 'stats', 'product', 'certificate', 'quote', 'podcast'];
 const ROW_2: MockupVariant[] = ['pricing', 'invoice', 'wedding', 'stats', 'product', 'certificate', 'quote', 'podcast', 'pricing', 'invoice'];
@@ -7,6 +8,12 @@ const ROW_2: MockupVariant[] = ['pricing', 'invoice', 'wedding', 'stats', 'produ
 function tripled(row: MockupVariant[]) {
   return [...row, ...row, ...row];
 }
+
+function tileClass(variant: MockupVariant) {
+  return `visora.io/render/${variant}.png`;
+}
+
+const TILE_SIZE = 'w-[220px] h-[142px] sm:w-[320px] sm:h-[206px] md:w-[420px] md:h-[270px] shrink-0';
 
 export default function MarqueeSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -31,12 +38,16 @@ export default function MarqueeSection() {
       <div className="flex flex-col gap-3">
         <div className="flex gap-2 sm:gap-3" style={{ willChange: 'transform', transform: `translateX(${offset - 200}px)` }}>
           {tripled(ROW_1).map((variant, i) => (
-            <TemplateMockup key={i} variant={variant} className="w-[220px] h-[142px] sm:w-[320px] sm:h-[206px] md:w-[420px] md:h-[270px] shrink-0" />
+            <BrowserFrame key={i} url={tileClass(variant)} className={TILE_SIZE}>
+              <TemplateMockup variant={variant} />
+            </BrowserFrame>
           ))}
         </div>
         <div className="flex gap-2 sm:gap-3" style={{ willChange: 'transform', transform: `translateX(${-(offset - 200)}px)` }}>
           {tripled(ROW_2).map((variant, i) => (
-            <TemplateMockup key={i} variant={variant} className="w-[220px] h-[142px] sm:w-[320px] sm:h-[206px] md:w-[420px] md:h-[270px] shrink-0" />
+            <BrowserFrame key={i} url={tileClass(variant)} className={TILE_SIZE}>
+              <TemplateMockup variant={variant} />
+            </BrowserFrame>
           ))}
         </div>
       </div>

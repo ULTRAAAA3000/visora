@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import TemplateMockup, { type MockupVariant } from './TemplateMockup';
+import BrowserFrame from './BrowserFrame';
 import FadeIn from './FadeIn';
 import { GhostButton } from './Buttons';
 
@@ -49,10 +50,16 @@ function StackCard({ item, index, total }: { item: ShowcaseItem; index: number; 
 
         <div className="flex gap-3 sm:gap-4 h-[calc(100%-100px)] px-2 sm:px-4 pb-2">
           <div className="w-2/5 flex flex-col gap-3 sm:gap-4">
-            <TemplateMockup variant={item.mockups[0]} className="flex-1" />
-            <TemplateMockup variant={item.mockups[1]} className="flex-[1.5]" />
+            <BrowserFrame url={`visora.io/render/${item.mockups[0]}.png`} className="flex-1">
+              <TemplateMockup variant={item.mockups[0]} />
+            </BrowserFrame>
+            <BrowserFrame url={`visora.io/render/${item.mockups[1]}.png`} className="flex-[1.5]">
+              <TemplateMockup variant={item.mockups[1]} />
+            </BrowserFrame>
           </div>
-          <TemplateMockup variant={item.mockups[2]} className="w-3/5 h-full" />
+          <BrowserFrame url={`visora.io/render/${item.mockups[2]}.png`} className="w-3/5 h-full">
+            <TemplateMockup variant={item.mockups[2]} />
+          </BrowserFrame>
         </div>
       </motion.div>
     </div>

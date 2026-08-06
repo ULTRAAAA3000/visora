@@ -140,7 +140,7 @@ const VARIANTS: Record<MockupVariant, React.FC> = {
 export default function TemplateMockup({ variant, className = '' }: { variant: MockupVariant; className?: string }) {
   const Component = VARIANTS[variant];
   return (
-    <div className={`rounded-2xl overflow-hidden border border-white/10 ${className}`}>
+    <div className={`h-full w-full ${className}`}>
       <Component />
     </div>
   );
