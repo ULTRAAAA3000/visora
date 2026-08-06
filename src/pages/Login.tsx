@@ -10,7 +10,8 @@ export default function Login() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = (location.state as { from?: { pathname: string } } | null)?.from?.pathname || '/dashboard';
+  const fromState = (location.state as { from?: { pathname: string; search?: string } } | null)?.from;
+  const redirectTo = fromState ? `${fromState.pathname}${fromState.search ?? ''}` : '/dashboard';
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

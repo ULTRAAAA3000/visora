@@ -8,6 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Connect from './pages/Connect';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
 import Templates from './pages/dashboard/Templates';
@@ -26,6 +27,15 @@ ReactDOM.createRoot(rootElement).render(
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+
+          <Route
+            path="/connect"
+            element={
+              <ProtectedRoute>
+                <Connect />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/dashboard"

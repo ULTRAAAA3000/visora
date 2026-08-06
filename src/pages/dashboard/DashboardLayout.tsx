@@ -2,6 +2,7 @@ import { type ComponentType } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { LayoutDashboard, FileCode2, LogOut } from 'lucide-react';
 import { useAuth } from '../../lib/AuthContext';
+import PendingConnectBanner from '../../components/PendingConnectBanner';
 
 interface NavItem {
   to: string;
@@ -58,6 +59,9 @@ export default function DashboardLayout() {
       </aside>
 
       <main className="flex-1 overflow-y-auto">
+        <div className="px-8 pt-6">
+          <PendingConnectBanner />
+        </div>
         <Outlet />
       </main>
     </div>
