@@ -33,9 +33,50 @@ export default {
       return handleRender(request, env, ctx, url);
     }
 
+    if (request.method === 'GET' && url.pathname === '/api/v1/whoami') {
+      return handleWhoami(request, env);
+    }
+
     return new Response('Not found', { status: 404 });
   },
 } satisfies ExportedHandler<Env>;
+
+/**
+ * Lightweight "is this API key valid" check — no render, no quota
+ * consumption. Used by the Make.com connection test (Make's best
+ * practice: every connection should validate against a cheap endpoint
+ * that only needs the API key) and useful generally for anyone
+ * building an integration who wants to sanity-check a key first.
+ */
+async function handleWhoami(request: Request, env: Env): Promise<Response> {
+  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+  const authHeader = request.headers.get('Authorization') || '';
+  const [scheme, token] = authHeader.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    return json({ success: false, error: 'Missing or malformed Authorization header. Expected: Bearer <api_key>' }, 401);
+  }
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('id, email, plan_tier, monthly_quota, usage_this_month')
+    .eq('api_key', token)
+    .single();
+
+  if (error || !profile) {
+    return json({ success: false, error: 'Invalid API key.' }, 401);
+  }
+
+  return json({
+    success: true,
+    data: {
+      email: profile.email,
+      plan_tier: profile.plan_tier,
+      monthly_quota: profile.monthly_quota,
+      usage_this_month: profile.usage_this_month,
+    },
+  });
+}
 
 interface RenderRequestBody {
   template_id?: string;
