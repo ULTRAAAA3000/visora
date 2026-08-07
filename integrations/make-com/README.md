@@ -43,7 +43,7 @@ Use these names/labels when the dialog asks:
 | `connection.communication.json` | Connection → **Communication** tab |
 | `rpcs/list-templates.json` | RPC → **Parameters** tab — this one takes no input, leave it `[]` |
 | `rpcs/list-templates.communication.json` | RPC → **Communication** tab |
-| `modules/render-image.json` | Module → **Parameters** tab (just the array) |
+| `modules/render-image.json` | Module → **Mappable Parameters** tab (just the array — leave Static Parameters as `[]`) |
 | `modules/render-image.communication.json` | Module → **Communication** tab |
 | `modules/render-image.interface.json` | Module → **Interface** tab |
 
@@ -61,7 +61,8 @@ Use these names/labels when the dialog asks:
    - **Communication** tab: paste `rpcs/list-templates.communication.json`. Calls `GET /api/v1/templates` and turns the result into `{value, label}` pairs.
 5. **Module: Render Image.**
    - Add a new module → Name `renderImage`, Label `Render Image`, Type **Action**, Connection `visora`.
-   - **Parameters** tab: paste the array from `modules/render-image.json`.
+   - **Static Parameters** tab: leave it `[]` — nothing goes here, these fields need to be mappable from other modules.
+   - **Mappable Parameters** tab: paste the array from `modules/render-image.json`.
    - **Communication** tab: paste `modules/render-image.communication.json`.
    - **Interface** tab: paste `modules/render-image.interface.json`.
 6. **Save + publish** as a private app — no need to submit to Make's public directory to use it in your own scenarios (same idea as sideloading the WordPress plugin zip before it clears review).
