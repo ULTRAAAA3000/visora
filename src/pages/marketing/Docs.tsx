@@ -25,6 +25,7 @@ const TOC = [
   { id: 'response', label: 'Response' },
   { id: 'errors', label: 'Errors' },
   { id: 'rate-limits', label: 'Rate limits & quota' },
+  { id: 'integrations', label: 'Integrations' },
 ];
 
 export default function Docs() {
@@ -170,6 +171,39 @@ export default function Docs() {
               <code className="text-white">429 Monthly render quota exceeded</code> until it resets next month or
               you upgrade your plan.
             </p>
+          </Section>
+
+          <Section id="integrations" title="Integrations">
+            <p>
+              Prefer not to call the API directly? Visora plugs into the tools you already use.
+            </p>
+            <div className="grid sm:grid-cols-3 gap-4 mt-2">
+              <a
+                href="https://www.make.com/en/hq/app-invitation/c829875c4efa7de56651bf14f41b93bd"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-xl border border-white/10 bg-white/[0.03] p-5 hover:bg-white/[0.06] transition-colors"
+              >
+                <p className="text-white font-medium mb-1">Make.com</p>
+                <p className="text-sm text-[#D7E2EA]/60">
+                  A Render Image action for any scenario — pick a template, map your data, get an image URL back.
+                </p>
+              </a>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+                <p className="text-white font-medium mb-1">WordPress</p>
+                <p className="text-sm text-[#D7E2EA]/60">
+                  One-click connect from Settings → Visora, plus a <code className="text-white/80">[visora_render]</code>{' '}
+                  shortcode. Available as a direct download while it clears the plugin directory review.
+                </p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+                <p className="text-white font-medium mb-1">Telegram</p>
+                <p className="text-sm text-[#D7E2EA]/60">
+                  Connect your account and render templates with a <code className="text-white/80">/render</code>{' '}
+                  command, right from chat.
+                </p>
+              </div>
+            </div>
           </Section>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8">
