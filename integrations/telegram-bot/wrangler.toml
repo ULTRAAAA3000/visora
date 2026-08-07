@@ -8,7 +8,7 @@ compatibility_flags = ["nodejs_compat"]
 #   npx wrangler kv namespace create CONNECT_STATE
 [[kv_namespaces]]
 binding = "CONNECT_STATE"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "4c5e62f8aad74d13982b7e9558a6877b"
 
 # Not secrets — just current deployment URLs. Update these (and re-deploy)
 # when the custom domain migration (main roadmap item 8) happens.
