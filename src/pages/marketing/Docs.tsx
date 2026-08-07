@@ -1,0 +1,191 @@
+import SiteHeader from '../../components/landing/SiteHeader';
+import Footer from '../../components/landing/Footer';
+
+function CodeBlock({ children }: { children: string }) {
+  return (
+    <pre className="bg-white/[0.04] border border-white/10 rounded-xl p-5 overflow-x-auto text-sm font-mono text-[#D7E2EA] leading-relaxed">
+      <code>{children}</code>
+    </pre>
+  );
+}
+
+function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+  return (
+    <section id={id} className="scroll-mt-32 mb-16">
+      <h2 className="text-2xl font-semibold text-white mb-5">{title}</h2>
+      <div className="space-y-4 text-[#D7E2EA]/80 leading-relaxed">{children}</div>
+    </section>
+  );
+}
+
+const TOC = [
+  { id: 'authentication', label: 'Authentication' },
+  { id: 'endpoint', label: 'Render endpoint' },
+  { id: 'request', label: 'Request body' },
+  { id: 'response', label: 'Response' },
+  { id: 'errors', label: 'Errors' },
+  { id: 'rate-limits', label: 'Rate limits & quota' },
+];
+
+export default function Docs() {
+  return (
+    <div className="bg-black min-h-screen">
+      <SiteHeader transparentAtTop={false} />
+
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 md:px-10 pt-36 pb-24 flex gap-16">
+        {/* Table of contents */}
+        <aside className="hidden lg:block w-56 shrink-0">
+          <div className="sticky top-32">
+            <p className="text-xs uppercase tracking-widest text-white/40 mb-4">On this page</p>
+            <ul className="space-y-3">
+              {TOC.map((item) => (
+                <li key={item.id}>
+                  <a href={`#${item.id}`} className="text-sm text-[#D7E2EA]/60 hover:text-white transition-colors">
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </aside>
+
+        {/* Content */}
+        <div className="flex-1 max-w-2xl">
+          <p className="text-xs uppercase tracking-widest text-white/40 mb-3">API Reference</p>
+          <h1 className="text-4xl font-bold text-white mb-4">Render API</h1>
+          <p className="text-lg text-[#D7E2EA]/70 mb-4">
+            One endpoint. Send a template ID and your data, get back a CDN-hosted image URL — rendered by real
+            headless Chromium, typically in under 150ms.
+          </p>
+          <p className="text-sm text-white/40 mb-16">
+            Replace <code className="text-white/60">your-worker.workers.dev</code> below with your actual Worker
+            URL from the Cloudflare dashboard (or your custom domain, once it's connected).
+          </p>
+
+          <Section id="authentication" title="Authentication">
+            <p>
+              Every request needs your API key in the <code className="text-white">Authorization</code> header,
+              as a Bearer token. Get your key from the{' '}
+              <a href="/dashboard" className="text-white underline underline-offset-2">
+                dashboard
+              </a>{' '}
+              after signing up.
+            </p>
+            <CodeBlock>{`Authorization: Bearer VISORA_LIVE_...`}</CodeBlock>
+          </Section>
+
+          <Section id="endpoint" title="Render endpoint">
+            <p>
+              <code className="text-white">POST</code>{' '}
+              <code className="text-white">https://your-worker.workers.dev/api/v1/render</code>
+            </p>
+            <p>Renders a template with your data and returns a JSON response containing the image URL.</p>
+          </Section>
+
+          <Section id="request" title="Request body">
+            <CodeBlock>{`{
+  "template_id": "tpl_ecom_v1",
+  "format": "png",
+  "data": {
+    "title": "Nike Air Max 270",
+    "price": "3,499 UAH"
+  }
+}`}</CodeBlock>
+            <ul className="list-disc list-inside space-y-2 mt-4">
+              <li>
+                <code className="text-white">template_id</code> — required. The ID of one of your templates
+                (presets or custom).
+              </li>
+              <li>
+                <code className="text-white">format</code> — optional. <code className="text-white">"png"</code>{' '}
+                (default) or <code className="text-white">"jpeg"</code>.
+              </li>
+              <li>
+                <code className="text-white">data</code> — optional. Key/value pairs filling in the template's{' '}
+                <code className="text-white">{'{{variables}}'}</code>. Falls back to the template's default
+                values for anything you don't pass.
+              </li>
+            </ul>
+          </Section>
+
+          <Section id="response" title="Response">
+            <p>
+              <code className="text-white">200 OK</code>
+            </p>
+            <CodeBlock>{`{
+  "success": true,
+  "render_time": "89ms",
+  "cached": false,
+  "data": {
+    "url": "https://your-worker.workers.dev/renders/2026-08/render_a1b2c3.png",
+    "width": 1200,
+    "height": 630,
+    "format": "png"
+  }
+}`}</CodeBlock>
+          </Section>
+
+          <Section id="errors" title="Errors">
+            <p>Errors return the relevant HTTP status with a JSON body:</p>
+            <CodeBlock>{`{ "success": false, "error": "Template not found." }`}</CodeBlock>
+            <table className="w-full mt-4 text-sm">
+              <thead>
+                <tr className="text-left text-white/40 border-b border-white/10">
+                  <th className="pb-2 font-medium">Status</th>
+                  <th className="pb-2 font-medium">Meaning</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                <tr>
+                  <td className="py-2 text-white">400</td>
+                  <td className="py-2">Missing or invalid JSON body / missing template_id</td>
+                </tr>
+                <tr>
+                  <td className="py-2 text-white">401</td>
+                  <td className="py-2">Missing, malformed, or invalid API key</td>
+                </tr>
+                <tr>
+                  <td className="py-2 text-white">404</td>
+                  <td className="py-2">Template not found</td>
+                </tr>
+                <tr>
+                  <td className="py-2 text-white">429</td>
+                  <td className="py-2">Monthly render quota exceeded</td>
+                </tr>
+                <tr>
+                  <td className="py-2 text-white">500</td>
+                  <td className="py-2">Render failed (malformed template HTML, etc.)</td>
+                </tr>
+              </tbody>
+            </table>
+          </Section>
+
+          <Section id="rate-limits" title="Rate limits & quota">
+            <p>
+              Your plan's monthly render quota and current usage are visible on your{' '}
+              <a href="/dashboard" className="text-white underline underline-offset-2">
+                dashboard overview
+              </a>
+              . Once you hit the quota, requests return{' '}
+              <code className="text-white">429 Monthly render quota exceeded</code> until it resets next month or
+              you upgrade your plan.
+            </p>
+          </Section>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8">
+            <p className="text-sm text-white/50 mb-2">Full example</p>
+            <CodeBlock>{`curl -X POST https://your-worker.workers.dev/api/v1/render \\
+  -H "Authorization: Bearer VISORA_LIVE_..." \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "template_id": "tpl_ecom_v1",
+    "data": { "title": "Nike Air Max 270" }
+  }'`}</CodeBlock>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  );
+}

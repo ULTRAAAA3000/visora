@@ -1,18 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Search,
-  User,
-  Menu,
-  X,
-  Zap,
-  Timer,
-  ShieldCheck,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
+import { Zap, Timer, ShieldCheck, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
+import SiteHeader from './landing/SiteHeader';
 
 /**
  * Visora — Hero Landing
@@ -29,31 +19,9 @@ import { useAuth } from '../lib/AuthContext';
  *    words with ones a developer evaluating this tool would actually read.
  */
 
-interface NavLink {
-  name: string;
-  delay: string;
-}
-
 const VisoraHero: React.FC = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const { session } = useAuth();
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  const navLinks: NavLink[] = [
-    { name: 'Templates', delay: '100ms' },
-    { name: 'Docs', delay: '150ms' },
-    { name: 'Pricing', delay: '200ms' },
-    { name: 'Showcase', delay: '250ms' },
-    { name: 'Changelog', delay: '300ms' },
-  ];
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-black text-white flex flex-col justify-between">
@@ -76,115 +44,7 @@ const VisoraHero: React.FC = () => {
         }}
       />
 
-      {/* NAVBAR */}
-      <header
-        className={`fixed top-0 inset-x-0 z-50 flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 md:py-6 w-full transition-all duration-500 ${
-          scrolled ? 'bg-black/70 backdrop-blur-xl border-b border-white/10' : 'bg-transparent border-b border-transparent'
-        }`}
-      >
-        {/* Left: VISORA Logo */}
-        <div className="animate-blur-fade-up" style={{ animationDelay: '0ms' }}>
-          <a href="#" className="block h-10 sm:h-12 md:h-14 transition-transform duration-300 hover:scale-105">
-            <img src="/visora-logo.png" alt="Visora" className="h-full w-auto object-contain" />
-          </a>
-        </div>
-
-        {/* Center: Desktop Navigation */}
-        <nav className="hidden lg:flex items-center space-x-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.name}
-              href={`#${link.name.toLowerCase().replace(/\s+/g, '-')}`}
-              className="group relative text-sm text-white hover:text-gray-300 transition-colors animate-blur-fade-up"
-              style={{ animationDelay: link.delay }}
-            >
-              {link.name}
-              <span className="absolute left-0 -bottom-1.5 h-px w-0 bg-white transition-all duration-300 ease-out group-hover:w-full" />
-            </a>
-          ))}
-        </nav>
-
-        {/* Right: Action Buttons */}
-        <div className="flex items-center space-x-3 sm:space-x-4">
-          <button
-            className="hidden sm:flex items-center gap-2 px-4 md:px-6 py-2 rounded-full liquid-glass text-sm font-medium hover:bg-white/10 transition-all animate-blur-fade-up cursor-pointer"
-            style={{ animationDelay: '350ms' }}
-          >
-            <Search className="w-[18px] h-[18px]" />
-            <span>Search docs</span>
-          </button>
-
-          <button
-            onClick={() => navigate(session ? '/dashboard' : '/login')}
-            className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full liquid-glass hover:bg-white/10 transition-all animate-blur-fade-up cursor-pointer"
-            style={{ animationDelay: '400ms' }}
-            aria-label="Account"
-          >
-            <User className="w-[18px] h-[18px]" />
-          </button>
-
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full liquid-glass transition-all animate-blur-fade-up relative cursor-pointer"
-            style={{ animationDelay: '350ms' }}
-            aria-label="Toggle Menu"
-          >
-            <div className="relative w-[18px] h-[18px] flex items-center justify-center">
-              <Menu
-                className={`absolute w-[18px] h-[18px] transition-all duration-500 ease-out ${
-                  mobileMenuOpen ? 'opacity-0 scale-50 rotate-180' : 'opacity-100 scale-100 rotate-0'
-                }`}
-              />
-              <X
-                className={`absolute w-[18px] h-[18px] transition-all duration-500 ease-out ${
-                  mobileMenuOpen ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-180'
-                }`}
-              />
-            </div>
-          </button>
-        </div>
-      </header>
-
-      {/* MOBILE MENU DROPDOWN */}
-      <div
-        className={`absolute top-[72px] left-0 w-full z-40 lg:hidden bg-gray-900/95 backdrop-blur-lg border-t border-b border-gray-800 shadow-2xl transition-all duration-500 ease-out ${
-          mobileMenuOpen
-            ? 'translate-y-0 opacity-100 pointer-events-auto'
-            : '-translate-y-4 opacity-0 pointer-events-none'
-        }`}
-      >
-        <div className="px-4 py-6 flex flex-col space-y-1">
-          {navLinks.map((link, idx) => (
-            <a
-              key={link.name}
-              href={`#${link.name.toLowerCase().replace(/\s+/g, '-')}`}
-              className={`py-3 px-3 rounded-lg text-base font-medium text-white hover:bg-gray-800/50 transition-all transform ${
-                mobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'
-              }`}
-              style={{ transitionDelay: `${mobileMenuOpen ? idx * 50 : 0}ms` }}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {link.name}
-            </a>
-          ))}
-          <div className="pt-4 mt-2 border-t border-gray-800 flex sm:hidden items-center justify-between gap-3">
-            <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full liquid-glass text-sm font-medium">
-              <Search className="w-[18px] h-[18px]" />
-              <span>Search docs</span>
-            </button>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                navigate(session ? '/dashboard' : '/login');
-              }}
-              className="flex items-center justify-center w-10 h-10 rounded-full liquid-glass"
-              aria-label="Account"
-            >
-              <User className="w-[18px] h-[18px]" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <SiteHeader />
 
       {/* HERO CONTENT */}
       <main className="flex-1 flex flex-col justify-end px-4 sm:px-6 md:px-12 pb-8 md:pb-16 z-10 w-full">
@@ -233,9 +93,9 @@ const VisoraHero: React.FC = () => {
                 <ArrowRight className="w-[18px] h-[18px]" />
               </button>
               <button
+                onClick={() => navigate('/docs')}
                 className="rounded-full font-medium liquid-glass px-6 sm:px-8 py-2.5 sm:py-3 hover:bg-white/10 transition-colors animate-blur-fade-up cursor-pointer"
                 style={{ animationDelay: '700ms' }}
-                title="Docs page isn't built yet"
               >
                 Read the docs
               </button>

@@ -53,6 +53,16 @@ export type RenderLog = {
   created_at: string;
 };
 
+export type TemplateGalleryEntry = {
+  id: string;
+  tier: 'free' | 'pro' | 'agency';
+  title: string;
+  category: string;
+  width: number;
+  height: number;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -131,7 +141,12 @@ export type Database = {
         Relationships: [];
       };
     };
-    Views: Record<string, never>;
+    Views: {
+      template_gallery: {
+        Row: TemplateGalleryEntry;
+        Relationships: [];
+      };
+    };
     Functions: Record<string, never>;
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

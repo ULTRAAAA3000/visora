@@ -9,6 +9,9 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Connect from './pages/Connect';
+import Docs from './pages/marketing/Docs';
+import TemplatesPublic from './pages/marketing/TemplatesPublic';
+import Changelog from './pages/marketing/Changelog';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
 import Templates from './pages/dashboard/Templates';
@@ -27,6 +30,9 @@ ReactDOM.createRoot(rootElement).render(
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/docs" element={<Docs />} />
+          <Route path="/templates" element={<TemplatesPublic />} />
+          <Route path="/changelog" element={<Changelog />} />
 
           <Route
             path="/connect"
