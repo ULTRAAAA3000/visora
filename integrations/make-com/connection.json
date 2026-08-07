@@ -1,14 +1,9 @@
-{
-  "name": "visora",
-  "label": "Visora",
-  "type": "basic",
-  "parameters": [
-    {
-      "name": "apiKey",
-      "type": "text",
-      "label": "API Key",
-      "required": true,
-      "help": "Find this in your Visora dashboard under Settings > API Key. Starts with VISORA_LIVE_."
-    }
-  ]
-}
+[
+  {
+    "name": "apiKey",
+    "type": "text",
+    "label": "API Key",
+    "required": true,
+    "help": "Find this in your Visora dashboard under Settings > API Key. Starts with VISORA_LIVE_."
+  }
+]

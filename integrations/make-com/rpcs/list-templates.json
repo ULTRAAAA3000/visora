@@ -1,4 +1,7 @@
-{
-  "name": "listTemplates",
-  "label": "List Templates"
-}
+// This RPC takes no input parameters, so its Parameters tab (if shown)
+// should be left as an empty array: []
+//
+// "listTemplates" / "List Templates" are the Name / Label you type into
+// the "Add RPC" creation dialog itself — Make doesn't take those as
+// pasted JSON.
+[]

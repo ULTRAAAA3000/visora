@@ -11,43 +11,60 @@ user to paste in a key they already have (from the dashboard, the
 Telegram bot's `/mykey`, or the WP plugin's Settings page). Simpler,
 and it's the standard pattern for Make custom apps.
 
-## What's in this folder
+## Where to build it
 
-Make's Custom Apps editor (Developer Portal) is JSON-based but edited
-per-component through their web UI or VS Code extension — there's no
-single-file app bundle to deploy via CLI the way the Cloudflare Workers
-here are. These files are the source of truth for each component; copy
-them into the corresponding tab when building the app.
+Inside your own Make account (`eu1.make.com` or `us1.make.com`, not a
+separate developer site) — left sidebar → **More** → **Custom apps**
+(it's tucked under "More" if not shown directly) → create a new app
+named `Visora`.
+
+## Important: name/label/type go in the creation dialog, not the JSON
+
+When you click "Add" for a connection, module, or RPC, Make's own
+dialog asks for **Name**, **Label**, **Type**, and (for modules) which
+**Connection** to attach. Those aren't pasted as JSON — you type them
+directly in that dialog. The JSON files here are for the tabs that
+open *after* that (Communication, Parameters, Interface).
+
+Use these names/labels when the dialog asks:
+
+| Component | Name | Label | Type |
+|---|---|---|---|
+| Connection | `visora` | Visora | API Key (basic) |
+| RPC | `listTemplates` | List Templates | — |
+| Module | `renderImage` | Render Image | Action, connection: `visora` |
+
+## What's in this folder
 
 | File | Goes into |
 |---|---|
-| `base.json` | App → **Base** |
-| `connection.json` | Connections → new connection → **Settings** (parameters) |
-| `connection.communication.json` | Connections → your connection → **Communication** |
-| `rpcs/list-templates.json` | RPCs → new RPC → **Settings** |
-| `rpcs/list-templates.communication.json` | RPCs → your RPC → **Communication** |
-| `modules/render-image.json` | Modules → new module (type: Action) → **Settings** (parameters) |
-| `modules/render-image.communication.json` | Modules → your module → **Communication** |
-| `modules/render-image.interface.json` | Modules → your module → **Interface** |
+| `base.json` | App → **Base** tab |
+| `connection.json` | Connection → **Parameters** tab (just the array — Name/Label/Type were set in the creation dialog) |
+| `connection.communication.json` | Connection → **Communication** tab |
+| `rpcs/list-templates.json` | RPC → **Parameters** tab — this one takes no input, leave it `[]` |
+| `rpcs/list-templates.communication.json` | RPC → **Communication** tab |
+| `modules/render-image.json` | Module → **Parameters** tab (just the array) |
+| `modules/render-image.communication.json` | Module → **Communication** tab |
+| `modules/render-image.interface.json` | Module → **Interface** tab |
 
-## Build it
+## Build it, step by step
 
-1. **Create the app.** [Make Developer Portal](https://www.make.com/en/developer-hub) → Apps → Create a new app → name it `Visora`.
-2. **Base.** Paste `base.json`'s `baseUrl` value (or the file's contents, depending on the editor version) into the app's Base tab. This is the current Cloudflare Worker URL — update it once the custom domain migration lands (main roadmap item 8).
+1. **Create the app.** Custom apps dashboard → create app → name `Visora`.
+2. **Base.** Open the Base tab, paste `base.json`. This is the current Cloudflare Worker URL — update it once the custom domain migration lands (main roadmap item 8).
 3. **Connection.**
-   - New connection, type **API Key** (`basic`).
-   - Settings tab: paste `connection.json`.
-   - Communication tab: paste `connection.communication.json`. This validates the key against `GET /api/v1/whoami` (added to the render worker specifically for this) — no render, no quota used, just confirms the key works.
+   - Add a new connection → Name `visora`, Label `Visora`, Type **API Key** (Make calls this `basic` internally).
+   - **Parameters** tab: paste the array from `connection.json`.
+   - **Communication** tab: paste `connection.communication.json`. This validates the key against `GET /api/v1/whoami` (added to the render worker specifically for this) — no render, no quota used, just confirms the key works.
 4. **RPC (template picker).**
-   - New RPC named `listTemplates`.
-   - Settings: paste `rpcs/list-templates.json`.
-   - Communication: paste `rpcs/list-templates.communication.json`. Calls `GET /api/v1/templates` and turns the result into `{value, label}` pairs.
+   - Add a new RPC → Name `listTemplates`, Label `List Templates`.
+   - **Parameters** tab: leave it `[]` (this RPC takes no input).
+   - **Communication** tab: paste `rpcs/list-templates.communication.json`. Calls `GET /api/v1/templates` and turns the result into `{value, label}` pairs.
 5. **Module: Render Image.**
-   - New module, type **Action**, connection `visora`.
-   - Settings/Parameters: paste `modules/render-image.json`.
-   - Communication: paste `modules/render-image.communication.json`.
-   - Interface: paste `modules/render-image.interface.json`.
-6. **Publish** as a private app (no need to submit to Make's public directory for this to work in your own scenarios — same idea as sideloading the WordPress plugin zip before it clears review).
+   - Add a new module → Name `renderImage`, Label `Render Image`, Type **Action**, Connection `visora`.
+   - **Parameters** tab: paste the array from `modules/render-image.json`.
+   - **Communication** tab: paste `modules/render-image.communication.json`.
+   - **Interface** tab: paste `modules/render-image.interface.json`.
+6. **Save + publish** as a private app — no need to submit to Make's public directory to use it in your own scenarios (same idea as sideloading the WordPress plugin zip before it clears review).
 
 ## How "Template Data" works
 
@@ -63,6 +80,6 @@ and `{{price}}` just needs two rows: `title` / `Nike Air Max 270` and
 
 `GET /api/v1/whoami` and `GET /api/v1/templates` count against the
 account's API key like any other authenticated call, but they don't
-increment `usage_this_month` (only an actual render does) — checking
-the render worker's `handleWhoami`/`handleListTemplates` if that
-behavior ever needs to change.
+increment `usage_this_month` (only an actual render does) — check the
+render worker's `handleWhoami`/`handleListTemplates` if that behavior
+ever needs to change.
