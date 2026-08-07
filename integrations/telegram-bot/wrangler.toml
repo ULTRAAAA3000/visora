@@ -13,8 +13,8 @@ id = "4c5e62f8aad74d13982b7e9558a6877b"
 # Not secrets — just current deployment URLs. Update these (and re-deploy)
 # when the custom domain migration (main roadmap item 8) happens.
 [vars]
-VISORA_APP_URL = "https://app.visora.io"
-VISORA_API_URL = "https://api.visora.io"
+VISORA_APP_URL = "https://visora-2kq.pages.dev"
+VISORA_API_URL = "https://visora-render-worker.mrcru96.workers.dev"
 
 # Secrets — do NOT put these here. Set with:
 #   npx wrangler secret put TELEGRAM_BOT_TOKEN
