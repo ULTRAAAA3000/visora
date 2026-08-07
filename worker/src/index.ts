@@ -37,9 +37,38 @@ export default {
       return handleWhoami(request, env);
     }
 
+    if (request.method === 'GET' && url.pathname === '/api/v1/templates') {
+      return handleListTemplates(request, env);
+    }
+
     return new Response('Not found', { status: 404 });
   },
 } satisfies ExportedHandler<Env>;
+
+/**
+ * Lists templates the caller can render: presets, plus their own custom
+ * templates. Exists mainly so integrations (Make.com's template picker,
+ * eventually a browser extension) don't have to hardcode or ask users
+ * to memorize template_id strings.
+ */
+async function handleListTemplates(request: Request, env: Env): Promise<Response> {
+  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+  const auth = await authenticate(request, supabase);
+  if (auth.error) return auth.error;
+
+  const { data: templates, error } = await supabase
+    .from('templates')
+    .select('id, title, category, width, height, is_preset')
+    .or(`is_preset.eq.true,user_id.eq.${auth.profile.id}`)
+    .order('is_preset', { ascending: false })
+    .order('title', { ascending: true });
+
+  if (error) {
+    return json({ success: false, error: 'Could not list templates.' }, 500);
+  }
+
+  return json({ success: true, data: templates ?? [] });
+}
 
 /**
  * Lightweight "is this API key valid" check — no render, no quota
