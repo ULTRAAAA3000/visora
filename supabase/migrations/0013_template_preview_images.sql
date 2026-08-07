@@ -9,6 +9,6 @@ ALTER TABLE public.templates
   ADD COLUMN preview_image_url TEXT;
 
 CREATE OR REPLACE VIEW public.template_gallery AS
-SELECT id, tier, title, category, width, height, preview_image_url, created_at
+SELECT id, tier, title, category, width, height, created_at, preview_image_url
 FROM public.templates
 WHERE is_preset = TRUE;
