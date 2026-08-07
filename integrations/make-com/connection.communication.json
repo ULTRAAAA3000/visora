@@ -1,0 +1,15 @@
+{
+  "url": "/api/v1/whoami",
+  "method": "GET",
+  "headers": {
+    "Authorization": "Bearer {{parameters.apiKey}}"
+  },
+  "log": {
+    "sanitize": ["request.headers.authorization"]
+  },
+  "response": {
+    "error": {
+      "message": "[{{statusCode}}] {{body.error}}"
+    }
+  }
+}

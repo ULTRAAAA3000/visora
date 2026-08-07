@@ -1,0 +1,6 @@
+[
+  { "name": "url", "type": "url", "label": "Image URL" },
+  { "name": "width", "type": "number", "label": "Width" },
+  { "name": "height", "type": "number", "label": "Height" },
+  { "name": "format", "type": "text", "label": "Format" }
+]

@@ -1,0 +1,38 @@
+{
+  "name": "renderImage",
+  "label": "Render Image",
+  "description": "Render an OG image, banner, or certificate from a Visora template.",
+  "type": "action",
+  "connection": "visora",
+  "parameters": [
+    {
+      "name": "templateId",
+      "type": "select",
+      "label": "Template",
+      "required": true,
+      "options": {
+        "store": "rpc://listTemplates"
+      }
+    },
+    {
+      "name": "format",
+      "type": "select",
+      "label": "Format",
+      "default": "png",
+      "options": [
+        { "label": "PNG", "value": "png" },
+        { "label": "JPEG", "value": "jpeg" }
+      ]
+    },
+    {
+      "name": "data",
+      "type": "array",
+      "label": "Template Data",
+      "help": "One row per {{variable}} the template's HTML uses — e.g. key \"title\", value \"Nike Air Max 270\".",
+      "spec": [
+        { "name": "key", "type": "text", "label": "Key", "required": true },
+        { "name": "value", "type": "text", "label": "Value", "required": true }
+      ]
+    }
+  ]
+}

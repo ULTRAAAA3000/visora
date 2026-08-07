@@ -1,0 +1,20 @@
+{
+  "url": "/api/v1/render",
+  "method": "POST",
+  "headers": {
+    "Authorization": "Bearer {{connection.apiKey}}",
+    "Content-Type": "application/json"
+  },
+  "body": {
+    "template_id": "{{parameters.templateId}}",
+    "format": "{{parameters.format}}",
+    "cache": true,
+    "data": "{{toCollection(parameters.data, \"key\", \"value\")}}"
+  },
+  "response": {
+    "output": "{{body.data}}",
+    "error": {
+      "message": "[{{statusCode}}] {{body.error}}"
+    }
+  }
+}
