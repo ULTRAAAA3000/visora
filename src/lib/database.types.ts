@@ -40,6 +40,7 @@ export type Template = {
   default_variables: Record<string, string>;
   width: number;
   height: number;
+  preview_image_url: string | null;
   created_at: string;
 };
 
@@ -60,6 +61,7 @@ export type TemplateGalleryEntry = {
   category: string;
   width: number;
   height: number;
+  preview_image_url: string | null;
   created_at: string;
 };
 
@@ -101,6 +103,7 @@ export type Database = {
           default_variables?: Record<string, string>;
           width?: number;
           height?: number;
+          preview_image_url?: string | null;
           created_at?: string;
         };
         Update: {
@@ -114,6 +117,7 @@ export type Database = {
           default_variables?: Record<string, string>;
           width?: number;
           height?: number;
+          preview_image_url?: string | null;
           created_at?: string;
         };
         Relationships: [];

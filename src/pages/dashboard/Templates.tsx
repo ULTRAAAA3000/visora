@@ -145,8 +145,17 @@ export default function Templates() {
                     Agency
                   </span>
 
-                  <div className="aspect-[4/3] rounded-lg bg-black/40 border border-amber-400/20 mb-4 flex items-center justify-center">
-                    <Crown className="w-6 h-6 text-amber-400/60" />
+                  <div className="aspect-[4/3] rounded-lg bg-black/40 border border-amber-400/20 mb-4 overflow-hidden flex items-center justify-center">
+                    {tpl.preview_image_url ? (
+                      <img
+                        src={tpl.preview_image_url}
+                        alt={tpl.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Crown className="w-6 h-6 text-amber-400/60" />
+                    )}
                   </div>
                   <h2 className="font-medium mb-1 pr-14">{tpl.title}</h2>
                   <p className="text-xs text-gray-500">
@@ -193,8 +202,17 @@ export default function Templates() {
                   </span>
                 )}
 
-                <div className="aspect-[4/3] rounded-lg bg-black/40 border border-white/10 mb-4 flex items-center justify-center">
-                  <FileCode2 className="w-6 h-6 text-gray-600" />
+                <div className="aspect-[4/3] rounded-lg bg-black/40 border border-white/10 mb-4 overflow-hidden flex items-center justify-center">
+                  {tpl.preview_image_url ? (
+                    <img
+                      src={tpl.preview_image_url}
+                      alt={tpl.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <FileCode2 className="w-6 h-6 text-gray-600" />
+                  )}
                 </div>
                 <h2 className="font-medium mb-1 pr-10">{tpl.title}</h2>
                 <p className="text-xs text-gray-500">

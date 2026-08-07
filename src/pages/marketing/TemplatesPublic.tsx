@@ -68,8 +68,15 @@ export default function TemplatesPublic() {
                   </span>
                 )}
 
-                <div className="aspect-[4/3] rounded-lg bg-black/40 border border-white/10 mb-4 flex items-center justify-center">
-                  {tpl.tier === 'agency' ? (
+                <div className="aspect-[4/3] rounded-lg bg-black/40 border border-white/10 mb-4 overflow-hidden flex items-center justify-center">
+                  {tpl.preview_image_url ? (
+                    <img
+                      src={tpl.preview_image_url}
+                      alt={tpl.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : tpl.tier === 'agency' ? (
                     <Crown className="w-6 h-6 text-amber-400/60" />
                   ) : (
                     <FileCode2 className="w-6 h-6 text-gray-600" />
