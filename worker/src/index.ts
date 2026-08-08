@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { nanoid } from 'nanoid';
 
 import { authenticate, json } from './lib/auth';
+import { handleLemonSqueezyWebhook } from './lib/billing';
 import { fillTemplate, renderHtmlToImage, type TemplateVariables } from './lib/render';
 import type { Env } from './env';
 
@@ -39,6 +40,11 @@ export default {
 
     if (request.method === 'GET' && url.pathname === '/api/v1/templates') {
       return handleListTemplates(request, env);
+    }
+
+    if (request.method === 'POST' && url.pathname === '/webhooks/lemonsqueezy') {
+      const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+      return handleLemonSqueezyWebhook(request, env.LEMONSQUEEZY_WEBHOOK_SECRET, supabase);
     }
 
     return new Response('Not found', { status: 404 });

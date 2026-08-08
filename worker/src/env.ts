@@ -3,4 +3,5 @@ export interface Env {
   RENDERS: R2Bucket;
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
+  LEMONSQUEEZY_WEBHOOK_SECRET: string;
 }

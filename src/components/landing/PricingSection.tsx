@@ -1,15 +1,17 @@
 import { Check, Minus, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/AuthContext';
+import { openCheckout, isCheckoutConfigured, type PaidPlan } from '../../lib/lemonsqueezy';
 import FadeIn from './FadeIn';
 import { GhostButton } from './Buttons';
 
 /**
- * Feature-comparison pricing table. Placeholder prices/limits below —
- * swap these once LemonSqueezy plans are finalized (Phase 4). Tiers
- * mirror the real `plan_tier` values templates are gated on
- * ('free' | 'pro' | 'agency'), so this table describes the product as
- * it actually behaves today, not an aspirational SKU list.
+ * Feature-comparison pricing table, wired to real LemonSqueezy overlay
+ * checkout for Pro/Agency (see src/lib/lemonsqueezy.ts). Prices below
+ * are the live numbers — keep in sync with the actual variant prices
+ * in the LemonSqueezy dashboard and with QUOTA_BY_TIER in
+ * worker/src/lib/billing.ts. Tiers mirror the real `plan_tier` values
+ * templates are gated on ('free' | 'pro' | 'agency').
  */
 
 type Cell = { type: 'check' } | { type: 'dash' } | { type: 'text'; value: string };
@@ -90,9 +92,24 @@ const PLANS: PlanColumn[] = [
 
 export default function PricingSection() {
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const { session, user } = useAuth();
 
-  const handleSelect = () => navigate(session ? '/dashboard' : '/signup');
+  const handleSelect = (plan: PlanColumn['key']) => {
+    if (plan === 'free') {
+      navigate(session ? '/dashboard' : '/signup');
+      return;
+    }
+
+    if (session && user?.email) {
+      openCheckout(plan as PaidPlan, { id: user.id, email: user.email });
+      return;
+    }
+
+    // Not logged in yet — sign up first, then Overview auto-resumes this
+    // checkout once the fresh profile exists (see Overview.tsx).
+    localStorage.setItem('visora_pending_plan', plan);
+    navigate('/signup');
+  };
 
   return (
     <section id="pricing" className="relative bg-black px-5 sm:px-8 md:px-10 py-20 sm:py-24 md:py-32 z-10">
@@ -136,9 +153,12 @@ export default function PricingSection() {
                       <span className="text-3xl font-black text-white">{plan.price}</span>
                       <span className="text-xs text-[#D7E2EA]/70">{plan.cadence}</span>
                     </div>
-                    <GhostButton onClick={handleSelect} className="w-full text-xs sm:text-sm justify-center">
+                    <GhostButton onClick={() => handleSelect(plan.key)} className="w-full text-xs sm:text-sm justify-center">
                       {plan.cta}
                     </GhostButton>
+                    {plan.key !== 'free' && !isCheckoutConfigured(plan.key as PaidPlan) && (
+                      <span className="text-[10px] text-[#D7E2EA]/40">Checkout coming soon</span>
+                    )}
                   </div>
                 </div>
               </FadeIn>

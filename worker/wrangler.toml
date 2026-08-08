@@ -19,3 +19,11 @@ bucket_name = "visora-renders"
 # Secrets — do NOT put these here. Set them with:
 #   npx wrangler secret put SUPABASE_URL
 #   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+#   npx wrangler secret put LEMONSQUEEZY_WEBHOOK_SECRET
+#
+# LEMONSQUEEZY_WEBHOOK_SECRET is the "Signing secret" you choose when
+# creating the webhook in LemonSqueezy: Store Settings -> Webhooks ->
+# Add webhook, URL = https://<this-worker-domain>/webhooks/lemonsqueezy,
+# events = subscription_created, subscription_updated, subscription_cancelled,
+# subscription_resumed, subscription_expired, subscription_paused,
+# subscription_unpaused, subscription_payment_failed.

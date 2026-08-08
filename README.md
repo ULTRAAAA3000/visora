@@ -10,7 +10,10 @@ Chromium instead of an AI model guessing at pixels.
 - ✅ **Phase 2** — Supabase schema + render engine (`supabase/`, `worker/`)
 - ✅ **Phase 3** — Dashboard: auth, API key, template editor with live preview
 - ✅ Fully TypeScript (frontend + Worker) — see "Type safety" below
-- ⬜ Phase 4 — CI/CD & production deployment polish, billing (LemonSqueezy)
+- ⬜ Phase 4 — CI/CD & production deployment polish; billing code is wired
+  (LemonSqueezy overlay checkout + webhook, see `worker/src/lib/billing.ts`)
+  but inactive until the Pro/Agency products exist and their env vars/secret
+  are set — see `.env.example` and `worker/wrangler.toml`
 
 ## Architecture (all on Cloudflare)
 
