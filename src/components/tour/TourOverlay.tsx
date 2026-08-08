@@ -16,6 +16,7 @@ export default function TourOverlay() {
   const { running, step, stepIndex, totalSteps, next, skip } = useTour();
   const [rect, setRect] = useState<Position | null>(null);
   const [searching, setSearching] = useState(false);
+  const [gaveUp, setGaveUp] = useState(false);
 
   // Locate the current step's target element. Right after a route change
   // the element may not have painted yet, so poll briefly instead of
@@ -23,20 +24,29 @@ export default function TourOverlay() {
   useEffect(() => {
     if (!running || !step) {
       setRect(null);
+      setGaveUp(false);
       return;
     }
     if (!step.target) {
       setRect(null);
+      setGaveUp(false);
       return;
     }
 
     let cancelled = false;
     setSearching(true);
+    setGaveUp(false);
 
     const measure = () => {
       const el = document.querySelector(step.target!);
       if (!el) return false;
       const r = el.getBoundingClientRect();
+      // A hidden duplicate (e.g. the desktop sidebar item on a mobile
+      // viewport, kept in the DOM via `hidden lg:flex` rather than
+      // unmounted) reports a zero-size rect — treat that as "not
+      // actually found" and keep looking, rather than spotlighting an
+      // invisible 0x0 box.
+      if (r.width === 0 || r.height === 0) return false;
       if (!cancelled) {
         setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
         setSearching(false);
@@ -49,9 +59,16 @@ export default function TourOverlay() {
     let attempts = 0;
     const interval = setInterval(() => {
       attempts += 1;
-      if (measure() || attempts > 40) {
+      if (measure() || attempts > 30) {
         clearInterval(interval);
-        if (attempts > 40 && !cancelled) setSearching(false);
+        if (attempts > 30 && !cancelled) {
+          // Gave up finding a visible target (likely a small-viewport
+          // layout where this element is legitimately off-screen).
+          // Fall back to a centered tooltip instead of leaving the
+          // person stuck on "Loading next step" forever.
+          setSearching(false);
+          setGaveUp(true);
+        }
       }
     }, 50);
 
@@ -69,7 +86,7 @@ export default function TourOverlay() {
 
   if (!running || !step) return null;
 
-  const isCentered = !step.target;
+  const isCentered = !step.target || gaveUp;
   const tooltipStyle = isCentered
     ? { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
     : rect

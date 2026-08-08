@@ -168,7 +168,7 @@ export default function TemplateEditor() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <p className="text-gray-400 text-sm">Loading template…</p>
       </div>
     );
@@ -176,7 +176,7 @@ export default function TemplateEditor() {
 
   if (!template) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <p className="text-red-400 text-sm">{error || 'Template not found.'}</p>
       </div>
     );
@@ -190,11 +190,11 @@ export default function TemplateEditor() {
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="flex items-center justify-between border-b border-white/10 px-6 py-3 shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-4 sm:px-6 py-3 shrink-0">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             onClick={() => navigate('/dashboard/templates')}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors shrink-0"
             aria-label="Back to templates"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -202,27 +202,27 @@ export default function TemplateEditor() {
           <input
             value={template.title}
             onChange={(e) => setTemplate({ ...template, title: e.target.value })}
-            className="bg-transparent text-sm font-medium outline-none border-b border-transparent focus:border-white/30 truncate"
+            className="bg-transparent text-sm font-medium outline-none border-b border-transparent focus:border-white/30 truncate min-w-0 flex-1"
           />
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center bg-white/5 border border-white/10 rounded-lg p-0.5 mr-2">
+          <div className="flex items-center bg-white/5 border border-white/10 rounded-lg p-0.5 mr-0 sm:mr-2">
             {tabs.map(({ id: tabId, label, icon: Icon }) => (
               <button
                 key={tabId}
                 onClick={() => setView(tabId)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                   view === tabId ? 'bg-white text-black' : 'text-gray-400 hover:text-white'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
-                {label}
+                <span className="hidden sm:inline">{label}</span>
               </button>
             ))}
           </div>
 
-          {error && <span className="text-xs text-red-400">{error}</span>}
+          {error && <span className="text-xs text-red-400 hidden sm:inline">{error}</span>}
           <button
             onClick={handleDelete}
             className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:text-red-400 hover:bg-white/5 transition-colors"
@@ -233,10 +233,10 @@ export default function TemplateEditor() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 bg-white text-black rounded-lg font-medium px-4 py-2 text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 bg-white text-black rounded-lg font-medium px-3 sm:px-4 py-2 text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
-            {saving ? 'Saving…' : 'Save'}
+            <span className="hidden sm:inline">{saving ? 'Saving…' : 'Save'}</span>
           </button>
         </div>
       </header>

@@ -28,7 +28,7 @@ export default function Overview() {
 
   if (!profile) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <p className="text-gray-400 text-sm">Loading your account…</p>
       </div>
     );
@@ -71,7 +71,7 @@ export default function Overview() {
   };
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-3xl">
       <h1 className="text-2xl font-medium mb-1">Overview</h1>
       <p className="text-gray-400 text-sm mb-8">
         Plan: <span className="text-white capitalize">{profile.plan_tier}</span>
