@@ -31,6 +31,7 @@ export type Profile = {
   lemonsqueezy_subscription_id: string | null;
   subscription_status: string | null;
   plan_renews_at: string | null;
+  is_admin: boolean;
   created_at: string;
 };
 
@@ -87,6 +88,7 @@ export type Database = {
           lemonsqueezy_subscription_id?: string | null;
           subscription_status?: string | null;
           plan_renews_at?: string | null;
+          is_admin?: boolean;
           created_at?: string;
         };
         Update: {
@@ -101,6 +103,7 @@ export type Database = {
           lemonsqueezy_subscription_id?: string | null;
           subscription_status?: string | null;
           plan_renews_at?: string | null;
+          is_admin?: boolean;
           created_at?: string;
         };
         Relationships: [];

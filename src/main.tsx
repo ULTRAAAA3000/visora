@@ -18,6 +18,11 @@ import Overview from './pages/dashboard/Overview';
 import Templates from './pages/dashboard/Templates';
 import TemplateEditor from './pages/dashboard/TemplateEditor';
 import DashboardGuide from './pages/dashboard/Guide';
+import AdminRoute from './components/AdminRoute';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminOverview from './pages/admin/AdminOverview';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminBilling from './pages/admin/AdminBilling';
 
 import './index.css';
 
@@ -58,6 +63,19 @@ ReactDOM.createRoot(rootElement).render(
             <Route path="templates" element={<Templates />} />
             <Route path="templates/:id" element={<TemplateEditor />} />
             <Route path="guide" element={<DashboardGuide />} />
+          </Route>
+
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<AdminOverview />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="billing" element={<AdminBilling />} />
           </Route>
         </Routes>
       </AuthProvider>
