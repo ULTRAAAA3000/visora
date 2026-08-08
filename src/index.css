@@ -12,6 +12,18 @@ body,
   font-family: 'Inter', sans-serif;
 }
 
+/*
+ * The app is predominantly dark (bg-black on nearly every page). Without
+ * this, any element that doesn't set its own text color explicitly
+ * (buttons, icons, etc.) falls back to the browser default of black —
+ * invisible on a black background. Sections with a light background
+ * (e.g. ServicesSection) already set explicit text colors on every
+ * element, so this default only fills gaps and never fights them.
+ */
+body {
+  color: #fff;
+}
+
 /* Shared "liquid glass" surface style — used by VisoraHero and dashboard UI. */
 .liquid-glass {
   background: rgba(255, 255, 255, 0.01);
