@@ -57,7 +57,7 @@ const Cell = ({ cell }: { cell: Cell }) => {
   if (cell.type === 'check') {
     return (
       <div className="flex justify-center">
-        <div className="rounded-full border border-white/25 p-1">
+        <div className="rounded-full border border-white/40 p-1">
           <Check className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
         </div>
       </div>
@@ -66,7 +66,7 @@ const Cell = ({ cell }: { cell: Cell }) => {
   if (cell.type === 'dash') {
     return (
       <div className="flex justify-center">
-        <Minus className="w-3.5 h-3.5 text-white/20" strokeWidth={2.5} />
+        <Minus className="w-3.5 h-3.5 text-white/35" strokeWidth={2.5} />
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default function PricingSection() {
         </h2>
       </FadeIn>
       <FadeIn delay={0.1}>
-        <p className="text-center text-[#D7E2EA]/60 font-medium mb-16 sm:mb-20 max-w-lg mx-auto" style={{ fontSize: 'clamp(0.9rem, 1.6vw, 1.1rem)' }}>
+        <p className="text-center text-[#D7E2EA]/80 font-medium mb-16 sm:mb-20 max-w-lg mx-auto" style={{ fontSize: 'clamp(0.9rem, 1.6vw, 1.1rem)' }}>
           Start free, scale to a plan that matches your render volume. No surprise overages.
         </p>
       </FadeIn>
@@ -117,27 +117,29 @@ export default function PricingSection() {
             <div />
             {PLANS.map((plan) => (
               <FadeIn key={plan.key} delay={0.05}>
-                <div
-                  className={`relative flex flex-col items-center gap-4 rounded-3xl px-4 py-8 liquid-glass ${
-                    plan.featured ? 'bg-white/[0.04] border border-white/20' : ''
-                  }`}
-                >
+                <div className="relative">
                   {plan.featured && (
-                    <span className="absolute -top-3 text-[10px] uppercase tracking-widest bg-white text-black rounded-full px-3 py-1 font-semibold">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 text-[10px] uppercase tracking-widest bg-white text-black rounded-full px-3 py-1 font-semibold whitespace-nowrap">
                       Most popular
                     </span>
                   )}
-                  <div className="flex items-center gap-1.5">
-                    {plan.key === 'agency' && <Crown className="w-4 h-4 text-white/70" />}
-                    <span className="text-base font-semibold text-white">{plan.name}</span>
+                  <div
+                    className={`relative flex flex-col items-center gap-4 rounded-3xl px-4 py-8 liquid-glass ${
+                      plan.featured ? 'bg-white/[0.04] border border-white/20' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      {plan.key === 'agency' && <Crown className="w-4 h-4 text-white/80" />}
+                      <span className="text-base font-semibold text-white">{plan.name}</span>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-black text-white">{plan.price}</span>
+                      <span className="text-xs text-[#D7E2EA]/70">{plan.cadence}</span>
+                    </div>
+                    <GhostButton onClick={handleSelect} className="w-full text-xs sm:text-sm justify-center">
+                      {plan.cta}
+                    </GhostButton>
                   </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-black text-white">{plan.price}</span>
-                    <span className="text-xs text-[#D7E2EA]/50">{plan.cadence}</span>
-                  </div>
-                  <GhostButton onClick={handleSelect} className="w-full text-xs sm:text-sm justify-center">
-                    {plan.cta}
-                  </GhostButton>
                 </div>
               </FadeIn>
             ))}
@@ -147,7 +149,7 @@ export default function PricingSection() {
           <div className="flex flex-col gap-10">
             {GROUPS.map((group) => (
               <div key={group.title}>
-                <h3 className="text-xs uppercase tracking-widest text-white/40 mb-4 px-4">{group.title}</h3>
+                <h3 className="text-xs uppercase tracking-widest text-white/55 mb-4 px-4">{group.title}</h3>
                 <div className="flex flex-col rounded-2xl overflow-hidden border border-white/10">
                   {group.rows.map((row, i) => (
                     <div
@@ -156,7 +158,7 @@ export default function PricingSection() {
                         i % 2 === 0 ? 'bg-white/[0.015]' : 'bg-transparent'
                       }`}
                     >
-                      <span className="text-sm text-[#D7E2EA]/80 font-medium pr-4">{row.name}</span>
+                      <span className="text-sm text-[#D7E2EA]/95 font-medium pr-4">{row.name}</span>
                       <Cell cell={row.free} />
                       <Cell cell={row.pro} />
                       <Cell cell={row.agency} />
