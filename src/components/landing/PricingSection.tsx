@@ -110,7 +110,7 @@ export default function PricingSection() {
         </p>
       </FadeIn>
 
-      <div className="max-w-6xl mx-auto overflow-x-auto">
+      <div className="max-w-6xl mx-auto overflow-x-auto pt-5">
         <div className="min-w-[820px]">
           {/* Plan header row */}
           <div className="grid grid-cols-[280px_1fr_1fr_1fr] gap-4 items-end mb-8 px-4">
