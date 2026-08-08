@@ -10,12 +10,14 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Connect from './pages/Connect';
 import Docs from './pages/marketing/Docs';
+import Guide from './pages/marketing/Guide';
 import TemplatesPublic from './pages/marketing/TemplatesPublic';
 import Changelog from './pages/marketing/Changelog';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
 import Templates from './pages/dashboard/Templates';
 import TemplateEditor from './pages/dashboard/TemplateEditor';
+import DashboardGuide from './pages/dashboard/Guide';
 
 import './index.css';
 
@@ -31,6 +33,7 @@ ReactDOM.createRoot(rootElement).render(
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/docs" element={<Docs />} />
+          <Route path="/guide" element={<Guide />} />
           <Route path="/templates" element={<TemplatesPublic />} />
           <Route path="/changelog" element={<Changelog />} />
 
@@ -54,6 +57,7 @@ ReactDOM.createRoot(rootElement).render(
             <Route index element={<Overview />} />
             <Route path="templates" element={<Templates />} />
             <Route path="templates/:id" element={<TemplateEditor />} />
+            <Route path="guide" element={<DashboardGuide />} />
           </Route>
         </Routes>
       </AuthProvider>

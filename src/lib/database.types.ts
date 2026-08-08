@@ -26,6 +26,7 @@ export type Profile = {
   plan_tier: 'free' | 'starter' | 'pro' | 'agency';
   monthly_quota: number;
   usage_this_month: number;
+  onboarding_completed_at: string | null;
   created_at: string;
 };
 
@@ -77,6 +78,7 @@ export type Database = {
           plan_tier?: Profile['plan_tier'];
           monthly_quota?: number;
           usage_this_month?: number;
+          onboarding_completed_at?: string | null;
           created_at?: string;
         };
         Update: {
@@ -86,6 +88,7 @@ export type Database = {
           plan_tier?: Profile['plan_tier'];
           monthly_quota?: number;
           usage_this_month?: number;
+          onboarding_completed_at?: string | null;
           created_at?: string;
         };
         Relationships: [];

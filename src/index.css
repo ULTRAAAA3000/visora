@@ -43,3 +43,25 @@ body,
   mask-composite: exclude;
   pointer-events: none;
 }
+
+/* Global version of the fade-up entrance used by the landing hero and
+   the dashboard onboarding tour's callout cards. VisoraHero also
+   defines a scoped copy via an inline <style> tag — that one only
+   exists while VisoraHero is mounted, so anything outside it (like the
+   dashboard) needs this global copy instead. */
+@keyframes blurFadeUp {
+  from {
+    opacity: 0;
+    filter: blur(20px);
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+.animate-blur-fade-up {
+  opacity: 0;
+  animation: blurFadeUp 1s ease-out forwards;
+}

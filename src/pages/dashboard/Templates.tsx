@@ -172,7 +172,7 @@ export default function Templates() {
       )}
 
       {/* Presets gallery */}
-      <div className="mb-12">
+      <div data-tour="preset-gallery" className="mb-12">
         <div className="flex items-center gap-2 mb-1">
           <Sparkles className="w-4 h-4 text-gray-400" />
           <h1 className="text-xl font-medium">Preset gallery</h1>
@@ -239,6 +239,7 @@ export default function Templates() {
             <p className="text-gray-400 text-sm">Templates you've created or customized.</p>
           </div>
           <button
+            data-tour="create-blank"
             onClick={handleCreateBlank}
             disabled={busyId === 'blank'}
             className="flex items-center gap-2 bg-white text-black rounded-lg font-medium px-4 py-2 text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"

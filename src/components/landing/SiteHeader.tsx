@@ -12,6 +12,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { name: 'Templates', href: '/templates', kind: 'route' },
   { name: 'Docs', href: '/docs', kind: 'route' },
+  { name: 'Guide', href: '/guide', kind: 'route' },
   { name: 'Pricing', href: '/#pricing', kind: 'hash' },
   { name: 'Showcase', href: '/#showcase', kind: 'hash' },
   { name: 'Changelog', href: '/changelog', kind: 'route' },

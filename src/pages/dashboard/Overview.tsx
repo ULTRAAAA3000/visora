@@ -52,7 +52,7 @@ export default function Overview() {
         Plan: <span className="text-white capitalize">{profile.plan_tier}</span>
       </p>
 
-      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 mb-6">
+      <section data-tour="api-key" className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 mb-6">
         <h2 className="text-sm font-medium text-gray-300 mb-3">API Key</h2>
         <div className="flex items-center gap-2">
           <code className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm font-mono truncate">
@@ -78,7 +78,7 @@ export default function Overview() {
         {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+      <section data-tour="usage" className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
         <h2 className="text-sm font-medium text-gray-300 mb-3">Monthly usage</h2>
         <div className="flex items-baseline justify-between mb-2">
           <span className="text-2xl font-medium">{profile.usage_this_month}</span>
