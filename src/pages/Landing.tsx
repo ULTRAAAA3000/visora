@@ -5,6 +5,7 @@ import MarqueeSection from '../components/landing/MarqueeSection';
 import AboutSection from '../components/landing/AboutSection';
 import ServicesSection from '../components/landing/ServicesSection';
 import ProjectsSection from '../components/landing/ProjectsSection';
+import PricingSection from '../components/landing/PricingSection';
 import Footer from '../components/landing/Footer';
 
 export default function Landing() {
@@ -27,6 +28,7 @@ export default function Landing() {
       <AboutSection />
       <ServicesSection />
       <ProjectsSection />
+      <PricingSection />
       <Footer />
     </div>
   );
