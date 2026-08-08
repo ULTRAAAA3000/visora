@@ -31,7 +31,7 @@ function StackCard({ item, index, total }: { item: ShowcaseItem; index: number; 
     <div ref={ref} className="h-[85vh] sticky" style={{ top: `${96 + index * 28}px` }}>
       <motion.div
         style={{ scale, top: `${index * 28}px` }}
-        className="relative rounded-[40px] sm:rounded-[50px] md:rounded-[60px] border-2 border-[#D7E2EA] bg-black p-4 sm:p-6 md:p-8 h-full"
+        className="relative rounded-[40px] sm:rounded-[50px] md:rounded-[60px] border-2 border-[#D7E2EA] bg-black p-4 sm:p-6 md:p-8 h-full overflow-hidden"
       >
         <div className="flex items-center justify-between mb-6 md:mb-10 px-2 sm:px-4">
           <div className="flex items-center gap-4 sm:gap-8">
