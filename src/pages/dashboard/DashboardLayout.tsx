@@ -1,6 +1,6 @@
 import { type ComponentType, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, FileCode2, LogOut, Compass, BookOpen, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileCode2, LogOut, Compass, BookOpen, Menu, X, Home } from 'lucide-react';
 import { useAuth } from '../../lib/AuthContext';
 import PendingConnectBanner from '../../components/PendingConnectBanner';
 import { TourProvider, useTour } from '../../lib/tour/TourContext';
@@ -54,6 +54,14 @@ function DashboardChrome() {
       </div>
 
       <div className="px-2 space-y-3">
+        <Link
+          to="/"
+          onClick={() => setMobileNavOpen(false)}
+          className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+        >
+          <Home className="w-4 h-4" />
+          Back to site
+        </Link>
         <button
           onClick={() => {
             setMobileNavOpen(false);
