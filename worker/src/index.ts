@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
-import { nanoid } from 'nanoid';
 
 import { authenticate, json } from './lib/auth';
 import { handleLemonSqueezyWebhook } from './lib/billing';
+import { computeCacheKey } from './lib/cache';
 import { fillTemplate, renderHtmlToImage, type TemplateVariables } from './lib/render';
 import { deliverRenderWebhook } from './lib/webhook';
 import type { Env } from './env';
@@ -154,29 +154,40 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
     return json({ success: false, error: 'Template not found.' }, 404);
   }
 
-  const html = fillTemplate(template.html_body, data, template.default_variables ?? {});
+  // Fully determined by (template content, format, input data), so the
+  // storage key doubles as the cache key — no separate random filename
+  // needed. `template.updated_at` folds in template edits automatically
+  // invalidating stale cache entries (see 0018's trigger).
+  const cacheKey = await computeCacheKey(template_id, template.updated_at, format, data);
+  const cached = await env.RENDERS.head(cacheKey);
+  const imageUrl = `${url.origin}/renders/${cacheKey}`;
 
-  let imageBuffer: Uint8Array;
-  try {
-    imageBuffer = await renderHtmlToImage(env.MYBROWSER, {
-      html,
-      width: template.width ?? 1200,
-      height: template.height ?? 630,
-      format,
+  let renderTimeMs: number;
+
+  if (cached) {
+    renderTimeMs = Date.now() - startedAt;
+  } else {
+    const html = fillTemplate(template.html_body, data, template.default_variables ?? {});
+
+    let imageBuffer: Uint8Array;
+    try {
+      imageBuffer = await renderHtmlToImage(env.MYBROWSER, {
+        html,
+        width: template.width ?? 1200,
+        height: template.height ?? 630,
+        format,
+      });
+    } catch (err) {
+      console.error('Render failed', err);
+      return json({ success: false, error: 'Render failed.' }, 500);
+    }
+
+    renderTimeMs = Date.now() - startedAt;
+
+    await env.RENDERS.put(cacheKey, imageBuffer, {
+      httpMetadata: { contentType: format === 'jpeg' ? 'image/jpeg' : 'image/png' },
     });
-  } catch (err) {
-    console.error('Render failed', err);
-    return json({ success: false, error: 'Render failed.' }, 500);
   }
-
-  const renderTimeMs = Date.now() - startedAt;
-  const key = `${new Date().toISOString().slice(0, 7)}/render_${nanoid(10)}.${format}`;
-
-  await env.RENDERS.put(key, imageBuffer, {
-    httpMetadata: { contentType: format === 'jpeg' ? 'image/jpeg' : 'image/png' },
-  });
-
-  const imageUrl = `${url.origin}/renders/${key}`;
 
   // Bookkeeping shouldn't block the response, but Workers terminate the
   // isolate once the response is returned unless kept alive explicitly.
@@ -207,7 +218,7 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
   return json({
     success: true,
     render_time: `${renderTimeMs}ms`,
-    cached: false,
+    cached: Boolean(cached),
     data: {
       url: imageUrl,
       width: template.width ?? 1200,

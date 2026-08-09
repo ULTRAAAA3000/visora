@@ -119,12 +119,20 @@ export default function Docs() {
   "render_time": "89ms",
   "cached": false,
   "data": {
-    "url": "https://your-worker.workers.dev/renders/2026-08/render_a1b2c3.png",
+    "url": "https://your-worker.workers.dev/renders/cache/3f9a…c2.png",
     "width": 1200,
     "height": 630,
     "format": "png"
   }
 }`}</CodeBlock>
+            <p>
+              Identical requests — same template, same <code className="text-white">data</code>, same{' '}
+              <code className="text-white">format</code> — are served from cache instead of re-rendering, and{' '}
+              <code className="text-white">cached</code> comes back <code className="text-white">true</code>. The{' '}
+              <code className="text-white">url</code> is stable for as long as the template stays unchanged, so
+              it's safe to store and reuse rather than re-requesting each time. Editing the template invalidates
+              its cache automatically.
+            </p>
           </Section>
 
           <Section id="errors" title="Errors">
@@ -187,7 +195,7 @@ export default function Docs() {
   "event": "render.completed",
   "data": {
     "template_id": "…",
-    "image_url": "https://…/renders/2026-08/render_a1b2c3.png",
+    "image_url": "https://…/renders/cache/3f9a…c2.png",
     "width": 1200,
     "height": 630,
     "format": "png",
