@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Visora — Render Images",
+  "short_name": "Visora",
+  "version": "1.0.0",
+  "description": "Render OG images, banners, and certificates from your Visora templates — right from the browser toolbar or a right-click.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Visora"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  },
+  "permissions": ["storage", "contextMenus"],
+  "host_permissions": [
+    "https://*.workers.dev/*",
+    "https://*.pages.dev/*"
+  ],
+  "optional_host_permissions": ["https://*/*"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "connect@visora.io",
+      "strict_min_version": "109.0"
+    }
+  }
+}

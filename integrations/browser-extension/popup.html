@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Visora</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <img src="icons/icon32.png" alt="" />
+    <span>Visora</span>
+  </header>
+
+  <!-- Shown when no API key is stored -->
+  <section id="view-connect" class="view hidden">
+    <p class="muted">Connect your Visora account to render templates from here.</p>
+    <label for="api-key-input">API key</label>
+    <input id="api-key-input" type="text" placeholder="VISORA_LIVE_..." autocomplete="off" spellcheck="false" />
+    <button id="save-key-btn" class="primary">Connect</button>
+    <a id="get-key-link" href="#" target="_blank" class="link-btn">Where do I find my API key?</a>
+  </section>
+
+  <!-- Shown once connected -->
+  <section id="view-render" class="view hidden">
+    <div class="row-between">
+      <span id="connected-badge" class="badge">Connected</span>
+      <button id="disconnect-btn" class="text-btn">Disconnect</button>
+    </div>
+
+    <label for="template-select">Template</label>
+    <select id="template-select"></select>
+
+    <div id="fields-container"></div>
+
+    <label for="format-select">Format</label>
+    <select id="format-select">
+      <option value="png">PNG</option>
+      <option value="jpeg">JPEG</option>
+    </select>
+
+    <button id="render-btn" class="primary">Render</button>
+
+    <div id="result" class="hidden">
+      <img id="result-img" alt="Rendered output" />
+      <div class="result-actions">
+        <button id="copy-url-btn" class="text-btn">Copy URL</button>
+        <a id="open-img-link" class="text-btn" target="_blank">Open</a>
+      </div>
+    </div>
+
+    <p id="error-msg" class="error hidden"></p>
+  </section>
+
+  <p id="loading-msg" class="muted">Loading…</p>
+
+  <details id="settings">
+    <summary>Advanced settings</summary>
+    <label for="app-url-input">Visora app URL</label>
+    <input id="app-url-input" type="text" />
+    <label for="api-url-input">Render API URL</label>
+    <input id="api-url-input" type="text" />
+    <button id="save-settings-btn" class="text-btn">Save</button>
+  </details>
+
+  <script src="popup.js"></script>
+</body>
+</html>
