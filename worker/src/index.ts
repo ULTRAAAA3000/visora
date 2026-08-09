@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import { authenticate, json } from './lib/auth';
 import { handleLemonSqueezyWebhook } from './lib/billing';
 import { fillTemplate, renderHtmlToImage, type TemplateVariables } from './lib/render';
+import { deliverRenderWebhook } from './lib/webhook';
 import type { Env } from './env';
 
 export default {
@@ -40,6 +41,10 @@ export default {
 
     if (request.method === 'GET' && url.pathname === '/api/v1/templates') {
       return handleListTemplates(request, env);
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/v1/webhooks/test') {
+      return handleTestWebhook(request, env);
     }
 
     if (request.method === 'POST' && url.pathname === '/webhooks/lemonsqueezy') {
@@ -188,6 +193,14 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
         status_code: 200,
         image_url: imageUrl,
       }),
+      deliverRenderWebhook(profile, 'render.completed', {
+        template_id,
+        image_url: imageUrl,
+        width: template.width ?? 1200,
+        height: template.height ?? 630,
+        format,
+        render_time_ms: renderTimeMs,
+      }),
     ]).catch((err) => console.error('Post-render bookkeeping failed', err))
   );
 
@@ -202,4 +215,44 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
       format,
     },
   });
+}
+
+/**
+ * Lets a Pro/Agency user fire a fake `webhook.test` event at their own
+ * configured endpoint from the dashboard, so they can verify signature
+ * verification and their handler's plumbing without needing to spend a
+ * real render on it. Doesn't touch monthly_quota — this isn't a render.
+ */
+async function handleTestWebhook(request: Request, env: Env): Promise<Response> {
+  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+  const authHeader = request.headers.get('Authorization') || '';
+  const [scheme, token] = authHeader.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    return json({ success: false, error: 'Missing or malformed Authorization header. Expected: Bearer <api_key>' }, 401);
+  }
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('plan_tier, webhook_url, webhook_secret')
+    .eq('api_key', token)
+    .single();
+
+  if (error || !profile) {
+    return json({ success: false, error: 'Invalid API key.' }, 401);
+  }
+
+  if (profile.plan_tier !== 'pro' && profile.plan_tier !== 'agency') {
+    return json({ success: false, error: 'Webhooks are a Pro/Agency feature.' }, 403);
+  }
+
+  if (!profile.webhook_url) {
+    return json({ success: false, error: 'No webhook_url is set on your account yet.' }, 400);
+  }
+
+  await deliverRenderWebhook(profile, 'webhook.test', {
+    message: "This is a test event from Visora's dashboard.",
+  });
+
+  return json({ success: true });
 }

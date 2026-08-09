@@ -32,6 +32,8 @@ export type Profile = {
   subscription_status: string | null;
   plan_renews_at: string | null;
   is_admin: boolean;
+  webhook_url: string | null;
+  webhook_secret: string | null;
   created_at: string;
 };
 
@@ -89,6 +91,8 @@ export type Database = {
           subscription_status?: string | null;
           plan_renews_at?: string | null;
           is_admin?: boolean;
+          webhook_url?: string | null;
+          webhook_secret?: string | null;
           created_at?: string;
         };
         Update: {
@@ -104,6 +108,8 @@ export type Database = {
           subscription_status?: string | null;
           plan_renews_at?: string | null;
           is_admin?: boolean;
+          webhook_url?: string | null;
+          webhook_secret?: string | null;
           created_at?: string;
         };
         Relationships: [];

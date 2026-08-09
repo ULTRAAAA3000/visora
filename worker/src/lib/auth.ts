@@ -13,6 +13,8 @@ interface AuthenticatedProfile {
   plan_tier: string;
   monthly_quota: number;
   usage_this_month: number;
+  webhook_url: string | null;
+  webhook_secret: string | null;
 }
 
 type AuthResult = { profile: AuthenticatedProfile; error?: undefined } | { profile?: undefined; error: Response };
@@ -39,7 +41,7 @@ export async function authenticate(request: Request, supabase: SupabaseClient): 
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id, email, plan_tier, monthly_quota, usage_this_month')
+    .select('id, email, plan_tier, monthly_quota, usage_this_month, webhook_url, webhook_secret')
     .eq('api_key', token)
     .single();
 

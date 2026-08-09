@@ -25,6 +25,7 @@ const TOC = [
   { id: 'response', label: 'Response' },
   { id: 'errors', label: 'Errors' },
   { id: 'rate-limits', label: 'Rate limits & quota' },
+  { id: 'webhooks', label: 'Webhooks' },
   { id: 'integrations', label: 'Integrations' },
 ];
 
@@ -170,6 +171,47 @@ export default function Docs() {
               . Once you hit the quota, requests return{' '}
               <code className="text-white">429 Monthly render quota exceeded</code> until it resets next month or
               you upgrade your plan.
+            </p>
+          </Section>
+
+          <Section id="webhooks" title="Webhooks">
+            <p>
+              On Pro and Agency, set a webhook URL from your{' '}
+              <a href="/dashboard" className="text-white underline underline-offset-2">
+                dashboard overview
+              </a>{' '}
+              and we'll <code className="text-white">POST</code> a <code className="text-white">render.completed</code>{' '}
+              event there every time a render finishes — no polling needed.
+            </p>
+            <CodeBlock>{`{
+  "event": "render.completed",
+  "data": {
+    "template_id": "…",
+    "image_url": "https://…/renders/2026-08/render_a1b2c3.png",
+    "width": 1200,
+    "height": 630,
+    "format": "png",
+    "render_time_ms": 842
+  },
+  "timestamp": "2026-08-09T12:00:00.000Z"
+}`}</CodeBlock>
+            <p>
+              Every request carries an <code className="text-white">X-Visora-Signature: sha256=…</code> header — an
+              HMAC-SHA256 of the raw request body, signed with the secret shown next to your webhook URL in the
+              dashboard. Verify it before trusting the payload:
+            </p>
+            <CodeBlock>{`const expected = crypto
+  .createHmac('sha256', WEBHOOK_SECRET)
+  .update(rawRequestBody) // the raw bytes, not JSON.parse()'d and re-stringified
+  .digest('hex');
+
+if (\`sha256=\${expected}\` !== req.headers['x-visora-signature']) {
+  return res.status(401).send('Invalid signature');
+}`}</CodeBlock>
+            <p>
+              Delivery is best-effort and not retried — if your endpoint is down or slow, that event is dropped.
+              Use the "Send test event" button in the dashboard to check your handler without spending a real
+              render on it.
             </p>
           </Section>
 
