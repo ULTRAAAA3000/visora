@@ -69,7 +69,7 @@ async function handleListTemplates(request: Request, env: Env): Promise<Response
 
   const { data: templates, error } = await supabase
     .from('templates')
-    .select('id, title, category, width, height, is_preset')
+    .select('id, title, category, width, height, is_preset, default_variables')
     .or(`is_preset.eq.true,user_id.eq.${auth.profile.id}`)
     .order('is_preset', { ascending: false })
     .order('title', { ascending: true });
