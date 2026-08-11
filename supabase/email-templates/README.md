@@ -10,24 +10,41 @@ source of truth in version control.
 2. Replace the **Message body** with the full contents of `confirm-signup.html`
 3. Save
 
-## 2. Allow the confirmation link to redirect into the app
+## 2. Reset password email
+
+1. Supabase Dashboard → **Authentication → Email Templates → Reset Password**
+2. Replace the **Message body** with the full contents of `reset-password.html`
+3. Save
+
+The frontend calls `supabase.auth.resetPasswordForEmail()` with
+`redirectTo: <origin>/reset-password` (see `src/pages/ForgotPassword.tsx`),
+so this link needs the same redirect URL whitelisting as step 3 below —
+`/reset-password` is covered by the same `/**` wildcard.
+
+## 3. Allow redirect links into the app
 
 The frontend calls `supabase.auth.signUp()` with
-`emailRedirectTo: <origin>/dashboard` (see `src/pages/Signup.jsx`), so the
+`emailRedirectTo: <origin>/dashboard` (see `src/pages/Signup.tsx`), so the
 confirmation link should land the user directly on `/dashboard`, already
-signed in. For Supabase to allow that redirect, whitelist your Pages domain:
+signed in. For Supabase to allow that redirect (and the reset-password one
+above), whitelist your Pages domain:
 
 1. Supabase Dashboard → **Authentication → URL Configuration**
 2. **Site URL**: `https://<your-project>.pages.dev` (or your custom domain)
 3. **Redirect URLs**: add `https://<your-project>.pages.dev/**`
-   (the `/**` wildcard covers `/dashboard`, `/login`, previews, etc.)
+   (the `/**` wildcard covers `/dashboard`, `/login`, `/reset-password`,
+   previews, etc.)
 4. Save
 
-Without step 2, Supabase rejects the redirect with "requested path is
-invalid" and falls back to the Site URL's root instead of `/dashboard`.
+Without step 3, Supabase rejects the redirect with "requested path is
+invalid" and falls back to the Site URL's root instead of the intended page.
 
-## 3. Optional: also update other auth emails
+**When you migrate to a custom domain**: update Site URL + Redirect URLs
+here to match, or every link in every email sent after that keeps pointing
+at the old `*.pages.dev` address.
 
-Same idea applies to **Magic Link**, **Reset password**, and **Change
-email address** templates if/when those flows get used — none are wired
-into the app yet (only email+password signup/login exist today).
+## 4. Optional: also update remaining auth emails
+
+Same idea applies to **Magic Link** and **Change email address** templates
+if/when those flows get used — not wired into the app yet (email+password
+signup/login/reset covers the current flows).

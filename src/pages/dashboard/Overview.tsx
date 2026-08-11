@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Copy, Check, RefreshCw, Crown, Webhook, Send } from 'lucide-react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { Copy, Check, RefreshCw, Crown, Webhook, Send, Lock } from 'lucide-react';
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { generateApiKey, generateWebhookSecret } from '../../lib/apiKey';
@@ -21,6 +21,11 @@ export default function Overview() {
   const [testSending, setTestSending] = useState(false);
   const [testResult, setTestResult] = useState<'ok' | 'error' | null>(null);
   const [secretCopied, setSecretCopied] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordChanged, setPasswordChanged] = useState(false);
 
   useEffect(() => {
     setWebhookUrlInput(profile?.webhook_url ?? '');
@@ -116,6 +121,34 @@ export default function Overview() {
     await navigator.clipboard.writeText(profile.webhook_secret);
     setSecretCopied(true);
     setTimeout(() => setSecretCopied(false), 2000);
+  };
+
+  const handleChangePassword = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordChanged(false);
+
+    if (newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwords don't match.");
+      return;
+    }
+
+    setChangingPassword(true);
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    setChangingPassword(false);
+
+    if (updateError) {
+      setPasswordError(updateError.message);
+      return;
+    }
+    setNewPassword('');
+    setConfirmPassword('');
+    setPasswordChanged(true);
+    setTimeout(() => setPasswordChanged(false), 3000);
   };
 
   const handleSendTestWebhook = async () => {
@@ -293,6 +326,48 @@ export default function Overview() {
             )}
           </>
         )}
+      </section>
+
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 mt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Lock className="w-4 h-4 text-gray-300" />
+          <h2 className="text-sm font-medium text-gray-300">Account security</h2>
+        </div>
+
+        <form onSubmit={handleChangePassword} className="space-y-3 max-w-sm">
+          <div>
+            <label className="block text-xs text-gray-500 mb-1.5">New password</label>
+            <input
+              type="password"
+              minLength={8}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-white/30"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1.5">Confirm new password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-white/30"
+            />
+          </div>
+
+          {passwordError && <p className="text-sm text-red-400">{passwordError}</p>}
+          {passwordChanged && <p className="text-sm text-emerald-400/80">Password updated.</p>}
+
+          <button
+            type="submit"
+            disabled={changingPassword || !newPassword}
+            className="bg-white text-black rounded-lg font-medium px-4 py-2 text-sm hover:bg-gray-200 transition-colors disabled:opacity-40"
+          >
+            {changingPassword ? 'Saving…' : 'Update password'}
+          </button>
+        </form>
       </section>
     </div>
   );

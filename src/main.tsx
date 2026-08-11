@@ -8,6 +8,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Connect from './pages/Connect';
 import Docs from './pages/marketing/Docs';
 import Guide from './pages/marketing/Guide';
@@ -37,6 +39,8 @@ ReactDOM.createRoot(rootElement).render(
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/guide" element={<Guide />} />
           <Route path="/templates" element={<TemplatesPublic />} />
