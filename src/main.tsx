@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 import { AuthProvider } from './lib/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { initAnalytics, trackPageview } from './lib/analytics';
 
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -34,10 +35,22 @@ import './index.css';
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('#root element not found in index.html');
 
+initAnalytics();
+
+/** Fires a GA4 pageview on every in-app route change (see src/lib/analytics.ts). */
+function RouteTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageview(location.pathname + location.search);
+  }, [location.pathname, location.search]);
+  return null;
+}
+
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
+        <RouteTracker />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />

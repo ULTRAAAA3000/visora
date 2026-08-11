@@ -92,8 +92,20 @@ export default function Privacy() {
 
         <Section title="Cookies & analytics">
           <p>
-            [Describe analytics tooling here once added — e.g. "We use [Plausible/PostHog/GA4], which
-            [does/doesn't] use cookies, to understand aggregate traffic. No cross-site tracking."]
+            We use Google Analytics 4 to understand aggregate traffic and usage — which pages get visited, roughly
+            how many people, that kind of thing. It sets cookies (<code>_ga</code>, <code>_ga_*</code>) and
+            processes data per{' '}
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white underline underline-offset-2"
+            >
+              Google's own privacy policy
+            </a>
+            . We haven't enabled Google Signals or any ad-personalization features, so this is traffic
+            measurement only — not cross-site ad tracking. No analytics runs on the render API itself, only on
+            the marketing site and dashboard.
           </p>
         </Section>
 
