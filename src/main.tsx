@@ -13,6 +13,9 @@ import ResetPassword from './pages/ResetPassword';
 import Connect from './pages/Connect';
 import Docs from './pages/marketing/Docs';
 import Guide from './pages/marketing/Guide';
+import Privacy from './pages/marketing/Privacy';
+import Terms from './pages/marketing/Terms';
+import NotFound from './pages/NotFound';
 import TemplatesPublic from './pages/marketing/TemplatesPublic';
 import Changelog from './pages/marketing/Changelog';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
@@ -43,6 +46,8 @@ ReactDOM.createRoot(rootElement).render(
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/guide" element={<Guide />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/templates" element={<TemplatesPublic />} />
           <Route path="/changelog" element={<Changelog />} />
 
@@ -81,6 +86,8 @@ ReactDOM.createRoot(rootElement).render(
             <Route path="users" element={<AdminUsers />} />
             <Route path="billing" element={<AdminBilling />} />
           </Route>
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

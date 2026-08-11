@@ -97,7 +97,15 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
-        <p className="text-white/30 text-xs">&copy; {new Date().getFullYear()} Visora. All rights reserved.</p>
+        <div className="flex items-center gap-5">
+          <p className="text-white/30 text-xs">&copy; {new Date().getFullYear()} Visora. All rights reserved.</p>
+          <Link to="/privacy" className="text-white/30 hover:text-white/60 transition-colors text-xs">
+            Privacy
+          </Link>
+          <Link to="/terms" className="text-white/30 hover:text-white/60 transition-colors text-xs">
+            Terms
+          </Link>
+        </div>
         <a
           href="https://github.com/ULTRAAAA3000/visora"
           target="_blank"
