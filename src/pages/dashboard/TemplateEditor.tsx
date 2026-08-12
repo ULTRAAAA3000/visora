@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye } from 'lucide-react';
+import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye, Download, Link2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../lib/AuthContext';
 import type { Template } from '../../lib/database.types';
 
 type VariableValues = Record<string, string>;
@@ -88,12 +89,16 @@ interface Tab {
 export default function TemplateEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { profile } = useAuth();
 
   const [template, setTemplate] = useState<Template | null>(null);
   const [variableValues, setVariableValues] = useState<VariableValues>({});
   const [view, setView] = useState<View>('fields');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [rendering, setRendering] = useState(false);
+  const [renderUrl, setRenderUrl] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -132,12 +137,14 @@ export default function TemplateEditor() {
 
   const handleFieldChange = (key: string, value: string) => {
     setVariableValues((prev) => ({ ...prev, [key]: value }));
+    setRenderUrl(null);
   };
 
   const handleSave = async () => {
     if (!template || !id) return;
     setSaving(true);
     setError(null);
+    setRenderUrl(null);
 
     const { error: updateError } = await supabase
       .from('templates')
@@ -151,8 +158,69 @@ export default function TemplateEditor() {
       })
       .eq('id', id);
 
-    setSaving(false);
-    if (updateError) setError(updateError.message);
+    if (updateError) {
+      setSaving(false);
+      setError(updateError.message);
+      return;
+    }
+
+    // Saving the template row doesn't produce an image on its own — render
+    // one now with the current field values so there's something to
+    // download/share immediately after hitting Save.
+    const apiBase = import.meta.env.VITE_RENDER_API_URL;
+    if (!apiBase || !profile?.api_key) {
+      setSaving(false);
+      setError('Render API is not configured — template saved, but no preview image was generated.');
+      return;
+    }
+
+    setRendering(true);
+    try {
+      const res = await fetch(`${apiBase.replace(/\/$/, '')}/api/v1/render`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${profile.api_key}`,
+        },
+        body: JSON.stringify({ template_id: id, format: 'png', data: variableValues }),
+      });
+      const payload = await res.json();
+      if (!res.ok || !payload.success) {
+        throw new Error(payload.error || 'Render failed.');
+      }
+      setRenderUrl(payload.data.url as string);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Render failed.');
+    } finally {
+      setRendering(false);
+      setSaving(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!renderUrl) return;
+    try {
+      const res = await fetch(renderUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${(template?.title || 'visora').replace(/\s+/g, '-').toLowerCase()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Cross-origin/CORS hiccup fallback — still gets the user their image.
+      window.open(renderUrl, '_blank');
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!renderUrl) return;
+    await navigator.clipboard.writeText(renderUrl);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   };
 
   const handleDelete = async () => {
@@ -236,10 +304,31 @@ export default function TemplateEditor() {
             className="flex items-center gap-2 bg-white text-black rounded-lg font-medium px-3 sm:px-4 py-2 text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             <Save className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{saving ? 'Saving…' : 'Save'}</span>
+            <span className="hidden sm:inline">{rendering ? 'Rendering…' : saving ? 'Saving…' : 'Save'}</span>
           </button>
         </div>
       </header>
+
+      {renderUrl && (
+        <div className="flex flex-wrap items-center gap-3 border-b border-white/10 bg-white/5 px-4 sm:px-6 py-2.5 text-xs shrink-0">
+          <span className="text-gray-400">Saved — image is ready.</span>
+          <button
+            onClick={handleDownload}
+            className="flex items-center gap-1.5 text-gray-200 hover:text-white transition-colors font-medium"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Download PNG
+          </button>
+          <span className="text-gray-700">·</span>
+          <button
+            onClick={handleCopyLink}
+            className="flex items-center gap-1.5 text-gray-200 hover:text-white transition-colors font-medium"
+          >
+            <Link2 className="w-3.5 h-3.5" />
+            {linkCopied ? 'Copied!' : 'Copy direct link'}
+          </button>
+        </div>
+      )}
 
       <div className="flex-1 min-h-0">
         {view === 'fields' && (
@@ -274,7 +363,10 @@ export default function TemplateEditor() {
             <p className="text-xs uppercase tracking-wide text-gray-500 px-6 pt-4 pb-2">HTML template</p>
             <textarea
               value={template.html_body}
-              onChange={(e) => setTemplate({ ...template, html_body: e.target.value })}
+              onChange={(e) => {
+                setTemplate({ ...template, html_body: e.target.value });
+                setRenderUrl(null);
+              }}
               spellCheck={false}
               className="flex-1 bg-black/40 text-gray-200 font-mono text-xs p-6 outline-none resize-none"
             />
