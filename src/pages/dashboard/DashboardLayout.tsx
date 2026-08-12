@@ -1,6 +1,6 @@
 import { type ComponentType, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, FileCode2, LogOut, Compass, BookOpen, Menu, X, Home } from 'lucide-react';
+import { LayoutDashboard, FileCode2, LogOut, Compass, BookOpen, Menu, X, Home, Layers } from 'lucide-react';
 import { useAuth } from '../../lib/AuthContext';
 import PendingConnectBanner from '../../components/PendingConnectBanner';
 import { TourProvider, useTour } from '../../lib/tour/TourContext';
@@ -17,6 +17,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, end: true, tourId: 'nav-overview' },
   { to: '/dashboard/templates', label: 'Templates', icon: FileCode2, tourId: 'nav-templates' },
+  { to: '/dashboard/bulk', label: 'Bulk', icon: Layers, tourId: 'nav-bulk' },
   { to: '/dashboard/guide', label: 'Guide', icon: BookOpen },
 ];
 

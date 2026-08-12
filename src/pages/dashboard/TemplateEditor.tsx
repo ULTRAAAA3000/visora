@@ -4,35 +4,9 @@ import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye, Download, Link2 } from
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/AuthContext';
 import type { Template } from '../../lib/database.types';
+import { fillTemplate, extractVariableKeys, humanizeKey, type VariableValues } from '../../lib/template';
 
-type VariableValues = Record<string, string>;
 type View = 'fields' | 'html' | 'preview';
-
-function fillTemplate(htmlBody: string, variables: VariableValues): string {
-  return htmlBody.replace(/{{\s*([\w.]+)\s*}}/g, (_match, key: string) => {
-    const value = variables[key];
-    return value === undefined || value === null ? '' : String(value);
-  });
-}
-
-/** Extracts every unique {{key}} placeholder from an HTML template, in order of first appearance. */
-function extractVariableKeys(htmlBody: string): string[] {
-  const keys: string[] = [];
-  const seen = new Set<string>();
-  const regex = /{{\s*([\w.]+)\s*}}/g;
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(htmlBody)) !== null) {
-    if (!seen.has(match[1])) {
-      seen.add(match[1]);
-      keys.push(match[1]);
-    }
-  }
-  return keys;
-}
-
-function humanizeKey(key: string): string {
-  return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
 
 /**
  * Renders the template's iframe scaled down to fit the available space,
