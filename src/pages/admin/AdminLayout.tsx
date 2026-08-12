@@ -1,6 +1,6 @@
 import { type ComponentType, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, CreditCard, LogOut, Menu, X, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, LogOut, Menu, X, ShieldCheck, BarChart3, Mail } from 'lucide-react';
 import { useAuth } from '../../lib/AuthContext';
 
 interface NavItem {
@@ -14,6 +14,8 @@ const navItems: NavItem[] = [
   { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/billing', label: 'Billing', icon: CreditCard },
+  { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/admin/messages', label: 'Messages', icon: Mail },
 ];
 
 export default function AdminLayout() {

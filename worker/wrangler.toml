@@ -20,6 +20,7 @@ bucket_name = "visora-renders"
 #   npx wrangler secret put SUPABASE_URL
 #   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 #   npx wrangler secret put LEMONSQUEEZY_WEBHOOK_SECRET
+#   npx wrangler secret put RESEND_API_KEY   (optional)
 #
 # LEMONSQUEEZY_WEBHOOK_SECRET is the "Signing secret" you choose when
 # creating the webhook in LemonSqueezy: Store Settings -> Webhooks ->
@@ -27,3 +28,10 @@ bucket_name = "visora-renders"
 # events = subscription_created, subscription_updated, subscription_cancelled,
 # subscription_resumed, subscription_expired, subscription_paused,
 # subscription_unpaused, subscription_payment_failed.
+#
+# RESEND_API_KEY is optional — the contact form works without it
+# (messages still land in Supabase, visible in /admin/messages). Set it
+# once a sending domain is verified in Resend to also email
+# visora.image@gmail.com for every submission. Also update the `from`
+# address in worker/src/lib/contact.ts to something @<your-domain> —
+# Resend requires it match a domain you've verified with them.

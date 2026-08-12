@@ -62,6 +62,24 @@ export type RenderLog = {
   created_at: string;
 };
 
+export type ContactMessageRow = {
+  id: string;
+  name: string | null;
+  email: string;
+  subject: string | null;
+  message: string;
+  status: string;
+  created_at: string;
+};
+
+export type PageViewRow = {
+  id: string;
+  path: string;
+  referrer: string | null;
+  country: string | null;
+  created_at: string;
+};
+
 export type TemplateGalleryEntry = {
   id: string;
   tier: 'free' | 'pro' | 'agency';
@@ -164,6 +182,46 @@ export type Database = {
           render_time_ms?: number;
           status_code?: number;
           image_url?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      contact_messages: {
+        Row: ContactMessageRow;
+        Insert: {
+          id?: string;
+          name?: string | null;
+          email: string;
+          subject?: string | null;
+          message: string;
+          status?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string | null;
+          email?: string;
+          subject?: string | null;
+          message?: string;
+          status?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      page_views: {
+        Row: PageViewRow;
+        Insert: {
+          id?: string;
+          path: string;
+          referrer?: string | null;
+          country?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          path?: string;
+          referrer?: string | null;
+          country?: string | null;
           created_at?: string;
         };
         Relationships: [];

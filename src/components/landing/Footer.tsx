@@ -12,6 +12,7 @@ const PRODUCT_LINKS = [
 const COMPANY_LINKS = [
   { label: 'About', href: '#about' },
   { label: 'Showcase', href: '#showcase' },
+  { label: 'Contact', href: '/contact' },
 ];
 
 export default function Footer() {

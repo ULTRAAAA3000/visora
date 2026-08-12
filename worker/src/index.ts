@@ -3,12 +3,42 @@ import { createClient } from '@supabase/supabase-js';
 import { authenticate, json } from './lib/auth';
 import { handleLemonSqueezyWebhook } from './lib/billing';
 import { computeCacheKey } from './lib/cache';
+import { handleContact } from './lib/contact';
 import { fillTemplate, renderHtmlToImage, type TemplateVariables } from './lib/render';
+import { handleTrack } from './lib/track';
 import { deliverRenderWebhook } from './lib/webhook';
 import type { Env } from './env';
 
+// A handful of endpoints (contact form, self-hosted pageview tracking,
+// the dashboard's "send test webhook" button) are called directly from
+// the browser, and the Pages frontend + this Worker live on different
+// origins — so they need CORS. Permissive (`*`) is fine here: render/
+// whoami/templates/webhook-test still require a valid API key, and
+// contact/track are meant to be publicly reachable anyway.
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+};
+
+function withCors(response: Response): Response {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(CORS_HEADERS)) headers.set(key, value);
+  return new Response(response.body, { status: response.status, headers });
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS });
+    }
+
+    const response = await route(request, env, ctx);
+    return withCors(response);
+  },
+} satisfies ExportedHandler<Env>;
+
+async function route(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     if (url.pathname === '/health') {
@@ -47,14 +77,23 @@ export default {
       return handleTestWebhook(request, env);
     }
 
+    if (request.method === 'POST' && url.pathname === '/api/v1/contact') {
+      const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+      return handleContact(request, env, supabase);
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/v1/track') {
+      const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+      return handleTrack(request, supabase);
+    }
+
     if (request.method === 'POST' && url.pathname === '/webhooks/lemonsqueezy') {
       const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
       return handleLemonSqueezyWebhook(request, env.LEMONSQUEEZY_WEBHOOK_SECRET, supabase);
     }
 
     return new Response('Not found', { status: 404 });
-  },
-} satisfies ExportedHandler<Env>;
+}
 
 /**
  * Lists templates the caller can render: presets, plus their own custom

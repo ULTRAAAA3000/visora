@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './lib/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import { initAnalytics, trackPageview } from './lib/analytics';
+import { trackPageviewSelf } from './lib/selfAnalytics';
 
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -19,6 +20,7 @@ import Terms from './pages/marketing/Terms';
 import NotFound from './pages/NotFound';
 import TemplatesPublic from './pages/marketing/TemplatesPublic';
 import Changelog from './pages/marketing/Changelog';
+import Contact from './pages/marketing/Contact';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
 import Templates from './pages/dashboard/Templates';
@@ -29,6 +31,8 @@ import AdminLayout from './pages/admin/AdminLayout';
 import AdminOverview from './pages/admin/AdminOverview';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminBilling from './pages/admin/AdminBilling';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminMessages from './pages/admin/AdminMessages';
 
 import './index.css';
 
@@ -42,6 +46,7 @@ function RouteTracker() {
   const location = useLocation();
   useEffect(() => {
     trackPageview(location.pathname + location.search);
+    trackPageviewSelf(location.pathname);
   }, [location.pathname, location.search]);
   return null;
 }
@@ -63,6 +68,7 @@ ReactDOM.createRoot(rootElement).render(
           <Route path="/terms" element={<Terms />} />
           <Route path="/templates" element={<TemplatesPublic />} />
           <Route path="/changelog" element={<Changelog />} />
+          <Route path="/contact" element={<Contact />} />
 
           <Route
             path="/connect"
@@ -98,6 +104,8 @@ ReactDOM.createRoot(rootElement).render(
             <Route index element={<AdminOverview />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="billing" element={<AdminBilling />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="messages" element={<AdminMessages />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

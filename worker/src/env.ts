@@ -4,4 +4,8 @@ export interface Env {
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
   LEMONSQUEEZY_WEBHOOK_SECRET: string;
+  // Optional — the contact form works (stores in Supabase, visible in
+  // /admin) with this unset. Set it once a domain is verified in
+  // Resend to also actually email visora.image@gmail.com.
+  RESEND_API_KEY?: string;
 }
