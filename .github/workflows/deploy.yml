@@ -3,7 +3,7 @@ name: Deploy Cloudflare Worker
 on:
   push:
     branches:
-      - main # Если ваша ветка называется master, замените main на master
+      - main
 
 jobs:
   deploy:
@@ -18,11 +18,7 @@ jobs:
         with:
           node-version: 20
 
-      # Раскомментируйте, если в проекте есть package.json и библиотеки:
-      # - name: Install dependencies
-      #   run: npm ci
-
       - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: $cfut_3jiwjLez5fBYGalAyx600amlDQYX8jonhtzNMJha2768064d
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
