@@ -10,11 +10,12 @@ import {
   Workflow,
   Terminal,
   HelpCircle,
+  MousePointerClick,
 } from 'lucide-react';
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ title, children, id }: { title: string; children: ReactNode; id?: string }) {
   return (
-    <section className="mb-16">
+    <section id={id} className="mb-16 scroll-mt-32">
       <h2 className="text-2xl font-semibold text-white mb-5">{title}</h2>
       <div className="space-y-4 text-[#D7E2EA]/80 leading-relaxed">{children}</div>
     </section>
@@ -87,7 +88,7 @@ function OptionCard({
 export default function GuideBody() {
   return (
     <>
-      <Section title="What Visora actually does">
+      <Section title="What Visora actually does" id="what-it-does">
         <p>
           You give Visora a <strong className="text-white">template</strong> — a design with blanks in it, like
           "product name" or "price" — and some <strong className="text-white">data</strong> to fill those blanks
@@ -99,7 +100,60 @@ export default function GuideBody() {
         </p>
       </Section>
 
-      <Section title="How it works, visually">
+      <Section title="Three ways to use Visora" id="three-ways">
+        <p className="mb-2">
+          Whichever way you do it, the result is always the same: a link to a finished image. The only thing
+          that changes is <em className="not-italic text-white">who's typing the request</em> — you, by hand;
+          someone else's tool, with no code; or your own program, automatically.
+        </p>
+
+        <div className="space-y-6 mt-6">
+          <NumberedStep n={1} title="By hand — you need one image, right now">
+            <p className="mb-2">
+              Open the Telegram bot, type something like <code className="text-white/80">/render</code> plus a
+              template and your data, and it drops the finished image straight into the chat. Or: highlight text
+              on any webpage, right-click → "Render with Visora", and a little window lets you build the image on
+              the spot.
+            </p>
+            <p className="text-xs text-white/40">
+              Good for someone who needs a picture once or twice a day and doesn't want to think about
+              automation at all.
+            </p>
+          </NumberedStep>
+
+          <NumberedStep n={2} title="No-code automation — set it up once, it runs itself">
+            <p className="mb-2">
+              Running WordPress? Install our plugin, drop a short tag like{' '}
+              <code className="text-white/80">{'[visora_render template=… price=…]'}</code> into a page — from
+              then on, every time someone visits that page, the plugin quietly asks Visora for the image and
+              shows it. You never touch it again.
+            </p>
+            <p>
+              Prefer Make.com? Drag together a chain with existing blocks — "when a product is added → render a
+              banner → post it to Instagram" — no code at all, just clicking pieces together.
+            </p>
+          </NumberedStep>
+
+          <NumberedStep n={3} title="A real API — for developers, fully automatic at scale">
+            <p>
+              Your own program sends a request straight to Visora's address on the internet, together with your
+              key and the product's details (name, price, whatever). A fraction of a second later, back comes a
+              link to the finished image — drop that link into an email, a website, an app, anywhere. This is
+              what a real client with their own developer uses: fully automatic, thousands of times a day, zero
+              clicks from a human.
+            </p>
+          </NumberedStep>
+        </div>
+
+        <p className="mt-6 text-sm text-white/50">
+          The key that looks like <code className="text-white/70">VISORA_LIVE_…</code> is just a pass — it's how
+          Visora knows a request is really from you and not from a stranger. Whichever of the three ways above
+          you use, that key (or your logged-in account, for the Telegram bot / browser extension) is what's
+          proving it's you.
+        </p>
+      </Section>
+
+      <Section title="How it works, visually" id="how-it-works">
         <div className="flex flex-col sm:flex-row items-center gap-3 mb-2">
           <FlowCard icon={FileCode2} label="A template + your data" />
           <ArrowRight className="w-5 h-5 text-white/30 shrink-0 rotate-90 sm:rotate-0" />
@@ -109,7 +163,7 @@ export default function GuideBody() {
         </div>
       </Section>
 
-      <Section title="Getting started">
+      <Section title="Getting started" id="getting-started">
         <div className="space-y-6">
           <NumberedStep n={1} title="Create an account">
             Sign up at the top of the site — free, no credit card. You land straight in the dashboard.
@@ -129,11 +183,11 @@ export default function GuideBody() {
         </div>
       </Section>
 
-      <Section title="Don't want to write code? You don't have to.">
+      <Section title="Don't want to write code? You don't have to." id="no-code">
         <p className="mb-4">
           Visora connects directly to tools you may already use — you never touch the API or a line of code.
         </p>
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 gap-4">
           <OptionCard
             icon={Blocks}
             title="WordPress"
@@ -148,14 +202,20 @@ export default function GuideBody() {
           />
           <OptionCard
             icon={Bot}
-            title="Telegram"
-            description="Connect your account to the bot, then render templates with a simple chat command."
+            title="Telegram bot"
+            description="Connect your account, then render templates with a simple chat command — no computer needed."
+            href="/docs#integrations"
+          />
+          <OptionCard
+            icon={MousePointerClick}
+            title="Browser extension"
+            description="Right-click selected text on any page → build an image on the spot. In testing — install-from-source for now."
             href="/docs#integrations"
           />
         </div>
       </Section>
 
-      <Section title="For developers: the actual API call">
+      <Section title="For developers: the actual API call" id="for-developers">
         <p className="mb-4">One endpoint. Send your template ID and data, get back an image URL.</p>
         <CodeBlock>{`curl -X POST https://<your-worker>.workers.dev/api/v1/render \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
@@ -177,7 +237,7 @@ export default function GuideBody() {
         </p>
       </Section>
 
-      <Section title="Common questions">
+      <Section title="Common questions" id="faq">
         <div className="space-y-5">
           <div className="flex gap-3">
             <HelpCircle className="w-4 h-4 text-white/40 shrink-0 mt-1" />

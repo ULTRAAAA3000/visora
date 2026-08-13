@@ -98,7 +98,7 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
-        <div className="flex items-center gap-5">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
           <p className="text-white/30 text-xs">&copy; {new Date().getFullYear()} Visora. All rights reserved.</p>
           <Link to="/privacy" className="text-white/30 hover:text-white/60 transition-colors text-xs">
             Privacy
@@ -106,6 +106,14 @@ export default function Footer() {
           <Link to="/terms" className="text-white/30 hover:text-white/60 transition-colors text-xs">
             Terms
           </Link>
+          <a
+            href="https://wysb.eu"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white/30 hover:text-white/60 transition-colors text-xs"
+          >
+            Powered by WYSB
+          </a>
         </div>
         <a
           href="https://github.com/ULTRAAAA3000/visora"

@@ -225,9 +225,13 @@ if (\`sha256=\${expected}\` !== req.headers['x-visora-signature']) {
 
           <Section id="integrations" title="Integrations">
             <p>
-              Prefer not to call the API directly? Visora plugs into the tools you already use.
+              Prefer not to call the API directly? Visora plugs into the tools you already use — see the{' '}
+              <a href="/guide#three-ways" className="text-white underline underline-offset-2">
+                plain-language guide
+              </a>{' '}
+              if you're not a developer.
             </p>
-            <div className="grid sm:grid-cols-3 gap-4 mt-2">
+            <div className="grid sm:grid-cols-2 gap-4 mt-2">
               <a
                 href="https://www.make.com/en/hq/app-invitation/c829875c4efa7de56651bf14f41b93bd"
                 target="_blank"
@@ -247,10 +251,26 @@ if (\`sha256=\${expected}\` !== req.headers['x-visora-signature']) {
                 </p>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-                <p className="text-white font-medium mb-1">Telegram</p>
+                <p className="text-white font-medium mb-1">Telegram bot</p>
                 <p className="text-sm text-[#D7E2EA]/60">
                   Connect your account and render templates with a <code className="text-white/80">/render</code>{' '}
-                  command, right from chat.
+                  command, right from chat. Live now.
+                </p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+                <p className="text-white font-medium mb-1">Browser extension</p>
+                <p className="text-sm text-[#D7E2EA]/60">
+                  Right-click selected text on any page → "Render with Visora". In testing — not yet in the
+                  Chrome/Firefox stores, installable from source (see{' '}
+                  <a
+                    href="https://github.com/ULTRAAAA3000/visora/tree/main/integrations/browser-extension"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/80 underline underline-offset-2"
+                  >
+                    the repo
+                  </a>
+                  ).
                 </p>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { Search, User, Menu, X } from 'lucide-react';
 import { useAuth } from '../../lib/AuthContext';
+import SearchModal from '../SearchModal';
 
 interface NavItem {
   name: string;
@@ -30,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
  */
 export default function SiteHeader({ transparentAtTop = true }: { transparentAtTop?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(!transparentAtTop);
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,6 +41,17 @@ export default function SiteHeader({ transparentAtTop = true }: { transparentAtT
   const progressScaleX = useSpring(scrollYProgress, { stiffness: 200, damping: 30, restDelta: 0.001 });
 
   const isActive = (item: NavItem) => item.kind === 'route' && location.pathname === item.href;
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!transparentAtTop) return;
@@ -112,11 +125,14 @@ export default function SiteHeader({ transparentAtTop = true }: { transparentAtT
         <div className="flex items-center space-x-3 sm:space-x-4">
           <motion.button
             whileTap={{ scale: 0.96 }}
+            onClick={() => setSearchOpen(true)}
             className="hidden sm:flex items-center gap-2 px-4 md:px-6 py-2 rounded-full liquid-glass text-sm font-medium hover:bg-white/10 transition-all cursor-pointer"
-            title="Search isn't built yet"
           >
             <Search className="w-[18px] h-[18px]" />
             <span>Search docs</span>
+            <span className="hidden md:inline text-[10px] text-white/30 border border-white/15 rounded px-1.5 py-0.5 ml-1">
+              ⌘K
+            </span>
           </motion.button>
 
           <motion.button
@@ -169,7 +185,13 @@ export default function SiteHeader({ transparentAtTop = true }: { transparentAtT
             )
           )}
           <div className="pt-4 mt-2 border-t border-gray-800 flex sm:hidden items-center justify-between gap-3">
-            <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full liquid-glass text-sm font-medium">
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setSearchOpen(true);
+              }}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-full liquid-glass text-sm font-medium"
+            >
               <Search className="w-[18px] h-[18px]" />
               <span>Search docs</span>
             </button>
@@ -186,6 +208,8 @@ export default function SiteHeader({ transparentAtTop = true }: { transparentAtT
           </div>
         </div>
       </div>
+
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }
