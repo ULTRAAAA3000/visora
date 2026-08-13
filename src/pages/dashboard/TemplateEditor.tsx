@@ -1,12 +1,112 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye, Download, Link2 } from 'lucide-react';
+import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye, Download, Link2, ImagePlus, X, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/AuthContext';
 import type { Template } from '../../lib/database.types';
 import { fillTemplate, extractVariableKeys, humanizeKey, type VariableValues } from '../../lib/template';
 
 type View = 'fields' | 'html' | 'preview';
+
+/** Field keys that read as "this holds a photo, not text" — swaps the text
+ * input for a drag/drop file picker that inlines the image as a data URL. */
+const IMAGE_KEY_PATTERN = /photo|image|logo|avatar|picture|background|banner|cover/i;
+
+function isImageField(key: string): boolean {
+  return IMAGE_KEY_PATTERN.test(key);
+}
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function ImageField({
+  keyName,
+  value,
+  onChange,
+}: {
+  keyName: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  const handleFile = async (file: File | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setImageError('Please choose an image file.');
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setImageError('Image is too large — 5MB max.');
+      return;
+    }
+    setImageError(null);
+    onChange(await readFileAsDataUrl(file));
+  };
+
+  return (
+    <div>
+      <label className="block text-sm text-gray-300 mb-1.5">{humanizeKey(keyName)}</label>
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          void handleFile(e.dataTransfer.files?.[0]);
+        }}
+        onClick={() => inputRef.current?.click()}
+        className={`relative rounded-lg border border-dashed px-3 py-3 text-sm cursor-pointer transition-colors flex items-center gap-3 ${
+          dragOver ? 'border-white/50 bg-white/10' : 'border-white/15 bg-white/5 hover:border-white/30'
+        }`}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => void handleFile(e.target.files?.[0])}
+        />
+        {value ? (
+          <>
+            <img src={value} alt="" className="w-10 h-10 rounded object-cover shrink-0 bg-black/40" />
+            <span className="text-gray-300 truncate flex-1">Photo selected — click to replace</span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange('');
+              }}
+              className="text-gray-500 hover:text-red-400 transition-colors shrink-0"
+              aria-label="Remove photo"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </>
+        ) : (
+          <>
+            <ImagePlus className="w-4 h-4 text-gray-500 shrink-0" />
+            <span className="text-gray-500">Click or drag a photo here</span>
+          </>
+        )}
+      </div>
+      {imageError && <p className="text-xs text-red-400 mt-1">{imageError}</p>}
+    </div>
+  );
+}
 
 /**
  * Renders the template's iframe scaled down to fit the available space,
@@ -74,6 +174,7 @@ export default function TemplateEditor() {
   const [renderUrl, setRenderUrl] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -171,22 +272,86 @@ export default function TemplateEditor() {
     }
   };
 
+  const downloadBlobUrl = (blobUrl: string) => {
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `${(template?.title || 'visora').replace(/\s+/g, '-').toLowerCase()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
   const handleDownload = async () => {
     if (!renderUrl) return;
     try {
       const res = await fetch(renderUrl);
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = `${(template?.title || 'visora').replace(/\s+/g, '-').toLowerCase()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      downloadBlobUrl(blobUrl);
       URL.revokeObjectURL(blobUrl);
     } catch {
       // Cross-origin/CORS hiccup fallback — still gets the user their image.
       window.open(renderUrl, '_blank');
+    }
+  };
+
+  /**
+   * "Скачать картинку" — the sandbox's one-click export. The render API
+   * only takes a `template_id` (it re-reads html_body from Supabase and
+   * caches on `updated_at`), so a render always needs current edits
+   * persisted first — this does that save silently, renders, and pipes
+   * the PNG straight to the browser's download dialog. Same underlying
+   * call as Save further up; this one just skips announcing "Saved" and
+   * goes straight for the file, since that's what the button promises.
+   */
+  const handleQuickDownload = async () => {
+    if (!template || !id) return;
+    const apiBase = import.meta.env.VITE_RENDER_API_URL;
+    if (!apiBase || !profile?.api_key) {
+      setError('Render API is not configured.');
+      return;
+    }
+
+    setDownloading(true);
+    setError(null);
+    try {
+      const { error: updateError } = await supabase
+        .from('templates')
+        .update({
+          title: template.title,
+          category: template.category,
+          html_body: template.html_body,
+          default_variables: variableValues,
+          width: template.width,
+          height: template.height,
+        })
+        .eq('id', id);
+      if (updateError) throw new Error(updateError.message);
+
+      const res = await fetch(`${apiBase.replace(/\/$/, '')}/api/v1/render`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${profile.api_key}`,
+        },
+        body: JSON.stringify({ template_id: id, format: 'png', data: variableValues }),
+      });
+      const payload = await res.json();
+      if (!res.ok || !payload.success) {
+        throw new Error(payload.error || 'Render failed.');
+      }
+
+      const url = payload.data.url as string;
+      setRenderUrl(url);
+      const imgRes = await fetch(url);
+      const blob = await imgRes.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      downloadBlobUrl(blobUrl);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Render failed.');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -273,6 +438,14 @@ export default function TemplateEditor() {
             <Trash2 className="w-4 h-4" />
           </button>
           <button
+            onClick={handleQuickDownload}
+            disabled={downloading}
+            className="flex items-center gap-2 bg-white/10 border border-white/10 rounded-lg font-medium px-3 sm:px-4 py-2 text-sm hover:bg-white/15 transition-colors disabled:opacity-50"
+          >
+            {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">{downloading ? 'Rendering…' : 'Скачать картинку'}</span>
+          </button>
+          <button
             onClick={handleSave}
             disabled={saving}
             className="flex items-center gap-2 bg-white text-black rounded-lg font-medium px-3 sm:px-4 py-2 text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
@@ -306,29 +479,47 @@ export default function TemplateEditor() {
 
       <div className="flex-1 min-h-0">
         {view === 'fields' && (
-          <div className="h-full overflow-y-auto p-6 max-w-xl mx-auto space-y-5">
-            <p className="text-xs uppercase tracking-wide text-gray-500">
-              Fill in the blanks — switch to the Preview tab to see the result.
-            </p>
-
-            {variableKeys.length === 0 ? (
-              <p className="text-sm text-gray-500">
-                This template has no <code className="text-gray-400">{'{{variables}}'}</code> yet. Switch to
-                the HTML tab to add some, e.g. <code className="text-gray-400">{'{{title}}'}</code>.
+          <div className="h-full flex flex-col lg:flex-row">
+            {/* Left: the "sandbox" — plain-language fields, no JSON required. */}
+            <div className="h-full overflow-y-auto p-6 space-y-5 lg:w-[420px] lg:shrink-0 lg:border-r lg:border-white/10">
+              <p className="text-xs uppercase tracking-wide text-gray-500">
+                Fill in the blanks — the preview updates as you type.
               </p>
-            ) : (
-              variableKeys.map((key) => (
-                <div key={key}>
-                  <label className="block text-sm text-gray-300 mb-1.5">{humanizeKey(key)}</label>
-                  <input
-                    value={variableValues[key] ?? ''}
-                    onChange={(e) => handleFieldChange(key, e.target.value)}
-                    className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-white/30 transition-colors"
-                    placeholder={key}
-                  />
-                </div>
-              ))
-            )}
+
+              {variableKeys.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  This template has no <code className="text-gray-400">{'{{variables}}'}</code> yet. Switch to
+                  the HTML tab to add some, e.g. <code className="text-gray-400">{'{{title}}'}</code>.
+                </p>
+              ) : (
+                variableKeys.map((key) =>
+                  isImageField(key) ? (
+                    <ImageField
+                      key={key}
+                      keyName={key}
+                      value={variableValues[key] ?? ''}
+                      onChange={(value) => handleFieldChange(key, value)}
+                    />
+                  ) : (
+                    <div key={key}>
+                      <label className="block text-sm text-gray-300 mb-1.5">{humanizeKey(key)}</label>
+                      <input
+                        value={variableValues[key] ?? ''}
+                        onChange={(e) => handleFieldChange(key, e.target.value)}
+                        className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2.5 text-sm outline-none focus:border-white/30 transition-colors"
+                        placeholder={key}
+                      />
+                    </div>
+                  )
+                )
+              )}
+            </div>
+
+            {/* Right: live preview, always in sync with the fields — hidden
+                on narrow screens where the Preview tab covers this instead. */}
+            <div className="hidden lg:block flex-1 min-w-0 bg-[#0a0a0a]">
+              <ScaledPreview html={previewHtml} width={template.width} height={template.height} />
+            </div>
           </div>
         )}
 
