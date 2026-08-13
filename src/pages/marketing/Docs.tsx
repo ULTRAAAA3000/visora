@@ -261,16 +261,7 @@ if (\`sha256=\${expected}\` !== req.headers['x-visora-signature']) {
                 <p className="text-white font-medium mb-1">Browser extension</p>
                 <p className="text-sm text-[#D7E2EA]/60">
                   Right-click selected text on any page → "Render with Visora". In testing — not yet in the
-                  Chrome/Firefox stores, installable from source (see{' '}
-                  <a
-                    href="https://github.com/ULTRAAAA3000/visora/tree/main/integrations/browser-extension"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/80 underline underline-offset-2"
-                  >
-                    the repo
-                  </a>
-                  ).
+                  Chrome/Firefox stores.
                 </p>
               </div>
             </div>
