@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye, Download, Link2, ImagePlus, X, Loader2 } from 'lucide-react';
+import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye, Download, Link2, ImagePlus, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/AuthContext';
 import type { Template } from '../../lib/database.types';
@@ -174,7 +174,6 @@ export default function TemplateEditor() {
   const [renderUrl, setRenderUrl] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -295,66 +294,6 @@ export default function TemplateEditor() {
     }
   };
 
-  /**
-   * "Скачать картинку" — the sandbox's one-click export. The render API
-   * only takes a `template_id` (it re-reads html_body from Supabase and
-   * caches on `updated_at`), so a render always needs current edits
-   * persisted first — this does that save silently, renders, and pipes
-   * the PNG straight to the browser's download dialog. Same underlying
-   * call as Save further up; this one just skips announcing "Saved" and
-   * goes straight for the file, since that's what the button promises.
-   */
-  const handleQuickDownload = async () => {
-    if (!template || !id) return;
-    const apiBase = import.meta.env.VITE_RENDER_API_URL;
-    if (!apiBase || !profile?.api_key) {
-      setError('Render API is not configured.');
-      return;
-    }
-
-    setDownloading(true);
-    setError(null);
-    try {
-      const { error: updateError } = await supabase
-        .from('templates')
-        .update({
-          title: template.title,
-          category: template.category,
-          html_body: template.html_body,
-          default_variables: variableValues,
-          width: template.width,
-          height: template.height,
-        })
-        .eq('id', id);
-      if (updateError) throw new Error(updateError.message);
-
-      const res = await fetch(`${apiBase.replace(/\/$/, '')}/api/v1/render`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${profile.api_key}`,
-        },
-        body: JSON.stringify({ template_id: id, format: 'png', data: variableValues }),
-      });
-      const payload = await res.json();
-      if (!res.ok || !payload.success) {
-        throw new Error(payload.error || 'Render failed.');
-      }
-
-      const url = payload.data.url as string;
-      setRenderUrl(url);
-      const imgRes = await fetch(url);
-      const blob = await imgRes.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      downloadBlobUrl(blobUrl);
-      URL.revokeObjectURL(blobUrl);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Render failed.');
-    } finally {
-      setDownloading(false);
-    }
-  };
-
   const handleCopyLink = async () => {
     if (!renderUrl) return;
     await navigator.clipboard.writeText(renderUrl);
@@ -436,14 +375,6 @@ export default function TemplateEditor() {
             aria-label="Delete template"
           >
             <Trash2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={handleQuickDownload}
-            disabled={downloading}
-            className="flex items-center gap-2 bg-white/10 border border-white/10 rounded-lg font-medium px-3 sm:px-4 py-2 text-sm hover:bg-white/15 transition-colors disabled:opacity-50"
-          >
-            {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{downloading ? 'Rendering…' : 'Скачать картинку'}</span>
           </button>
           <button
             onClick={handleSave}
