@@ -34,9 +34,10 @@
 
 ### 6–9. ~~SEO-база~~ — готово
 `robots.txt`, `sitemap.xml`, favicon, OG/Twitter meta-теги (со своей
-og-картинкой), кастомная 404-страница. Домен в `sitemap.xml`/`robots.txt`
-пока временный (`visora-2kq.pages.dev`) — не забудьте поменять при
-переезде, иначе поисковики будут путаться.
+og-картинкой), кастомная 404-страница. Домен везде — `visor-a.com` /
+`api.visor-a.com` (миграция с `visora-2kq.pages.dev` завершена
+13–14.08.2026, включая watermark в двух пресетах шаблонов через
+миграцию `0020_domain_migration_watermark.sql`).
 
 **Отдельная идея на будущее:** og-картинка сейчас статичная — было бы
 красиво заменить её на картинку, реально сгенерированную самой Visora
@@ -92,12 +93,10 @@ LemonSqueezy → Paddle/Dodo. Не трогаем, пока сами не ска
 2. **Supabase → Authentication → URL Configuration**: обновить Site URL
    и Redirect URLs на новый домен — иначе письма подтверждения регистрации
    будут вести на старый `*.pages.dev`
-3. Обновить дефолтные URL во всех интеграциях на новый домен:
-   - WordPress-плагин: `VISORA_CONNECT_DEFAULT_APP_URL`/`API_URL` в `visora-connect.php`
-   - Telegram-бот: `[vars]` в `integrations/telegram-bot/wrangler.toml`, передеплой
-   - Make.com: `base.json` → `baseUrl`
-   - Расширение: `DEFAULTS` в `popup.js`
-4. Если заведёте отдельный поддомен под API (`api.visora.io`) — привязать
-   кастомный домен и к render-воркеру тоже, не только к Pages
+3. ~~Обновить дефолтные URL во всех интеграциях на новый домен~~ — готово
+   (WordPress-плагин, Telegram-бот, Make.com, расширение — все теперь на
+   `visor-a.com`/`api.visor-a.com`).
+4. ~~Привязать custom domain `api.visor-a.com` к render-воркеру~~ — готово,
+   маршрут в `worker/wrangler.toml`, задеплоено через GitHub Actions.
 5. DNS обычно применяется 5–30 минут, но иногда до 24–48ч — не планируйте
    покупку домена и старт промо-кампании в один день, заложите буфер

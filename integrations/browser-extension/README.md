@@ -50,11 +50,11 @@ signed build (see Publishing below).
    defaults), **Render**.
 
 **Advanced settings** (collapsed by default) lets you point `Visora
-app URL` / `Render API URL` somewhere other than the current
-`*.workers.dev` / `*.pages.dev` defaults — needed once the custom
-domain migration (main roadmap item 8) happens. Saving a URL outside
-the manifest's declared `host_permissions` triggers a one-time browser
-permission prompt (MV3 requirement).
+app URL` / `Render API URL` somewhere other than the `visor-a.com` /
+`api.visor-a.com` defaults (e.g. `*.workers.dev` for local/staging
+testing). Saving a URL outside the manifest's declared
+`host_permissions` triggers a one-time browser permission prompt (MV3
+requirement).
 
 ## Publishing (later, not done yet)
 

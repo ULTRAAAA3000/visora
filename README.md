@@ -107,7 +107,7 @@ npm run deploy   # deploy to Cloudflare
 Then:
 
 ```bash
-curl -X POST https://<your-worker>.workers.dev/api/v1/render \
+curl -X POST https://api.visor-a.com/api/v1/render \
   -H "Authorization: Bearer <api_key>" \
   -H "Content-Type: application/json" \
   -d '{"template_id": "tpl_ecom_v1", "format": "png", "data": {"title": "Nike Air Max 270"}}'

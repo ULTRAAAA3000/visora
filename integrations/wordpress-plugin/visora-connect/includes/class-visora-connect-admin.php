@@ -80,7 +80,7 @@ class Visora_Connect_Admin {
 						</a>
 					</p>
 					<p class="description">
-						<?php esc_html_e( "You'll be asked to log in (or sign up) on visora.io, then sent right back here.", 'visora-connect' ); ?>
+						<?php esc_html_e( "You'll be asked to log in (or sign up) on visor-a.com, then sent right back here.", 'visora-connect' ); ?>
 					</p>
 				<?php endif; ?>
 			</div>

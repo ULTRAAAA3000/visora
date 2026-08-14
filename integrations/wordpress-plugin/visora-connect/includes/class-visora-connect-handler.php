@@ -4,7 +4,7 @@
  * admin-post callback that delivers the API key back to this site.
  *
  * Security model: WordPress never sends credentials anywhere. It sends
- * the browser (an already-authenticated wp-admin user) to visora.io
+ * the browser (an already-authenticated wp-admin user) to visor-a.com
  * with a random, single-use `state` token stored server-side in a
  * transient. Visora's /connect page shows the user what's being
  * requested and, on approval, redirects the browser BACK to WordPress
