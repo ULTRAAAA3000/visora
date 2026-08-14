@@ -34,6 +34,52 @@
       content="Turn HTML and Tailwind templates into OG images, product banners, and certificates — rendered by real Chromium, not a language model guessing at pixels."
     />
     <meta name="twitter:image" content="https://visor-a.com/og-image.png" />
+
+    <!-- Structured data for search engines and AI answer engines -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Visora",
+        "url": "https://visor-a.com/",
+        "description": "API-first tool that turns HTML and Tailwind templates into images — OG images, product banners, certificates — rendered by real headless Chromium, not a language model guessing at pixels.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any (API-based, no install required)",
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "Free",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "500 renders/month, 1 API key"
+          },
+          {
+            "@type": "Offer",
+            "name": "Pro",
+            "price": "19",
+            "priceCurrency": "USD",
+            "description": "20,000 renders/month, 5 API keys, 4K output, webhooks"
+          },
+          {
+            "@type": "Offer",
+            "name": "Agency",
+            "price": "49",
+            "priceCurrency": "USD",
+            "description": "100,000 renders/month, unlimited API keys, agency-exclusive templates, priority queue"
+          }
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Visora",
+        "url": "https://visor-a.com/",
+        "logo": "https://visor-a.com/apple-touch-icon.png",
+        "email": "visora.image@gmail.com"
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
