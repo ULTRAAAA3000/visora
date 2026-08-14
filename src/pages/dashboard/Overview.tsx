@@ -3,7 +3,7 @@ import { Copy, Check, RefreshCw, Crown, Webhook, Send, Lock } from 'lucide-react
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { generateApiKey, generateWebhookSecret } from '../../lib/apiKey';
-import { openCheckout, isCheckoutConfigured, type PaidPlan } from '../../lib/lemonsqueezy';
+import { openCheckout, isCheckoutConfigured, type PaidPlan } from '../../lib/paddle';
 
 const PLAN_LABEL: Record<string, string> = { free: 'Free', starter: 'Starter', pro: 'Pro', agency: 'Agency' };
 const WEBHOOK_PLANS = new Set(['pro', 'agency']);

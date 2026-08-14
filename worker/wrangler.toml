@@ -28,15 +28,18 @@ bucket_name = "visora-renders"
 # Secrets — do NOT put these here. Set them with:
 #   npx wrangler secret put SUPABASE_URL
 #   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
-#   npx wrangler secret put LEMONSQUEEZY_WEBHOOK_SECRET
+#   npx wrangler secret put PADDLE_WEBHOOK_SECRET
 #   npx wrangler secret put RESEND_API_KEY   (optional)
 #
-# LEMONSQUEEZY_WEBHOOK_SECRET is the "Signing secret" you choose when
-# creating the webhook in LemonSqueezy: Store Settings -> Webhooks ->
-# Add webhook, URL = https://api.visor-a.com/webhooks/lemonsqueezy,
-# events = subscription_created, subscription_updated, subscription_cancelled,
-# subscription_resumed, subscription_expired, subscription_paused,
-# subscription_unpaused, subscription_payment_failed.
+# PADDLE_WEBHOOK_SECRET is the "Secret key" Paddle generates when you
+# create the notification destination: Paddle Dashboard -> Developer
+# Tools -> Notifications -> Add destination, URL =
+# https://api.visor-a.com/webhooks/paddle, type = webhook, events =
+# subscription.created, subscription.updated, subscription.activated,
+# subscription.canceled, subscription.paused, subscription.resumed,
+# subscription.trialing. (Do this once in Sandbox while testing, then
+# again in Live/production — Paddle keeps the two fully separate, with
+# separate secrets, price IDs, and API keys.)
 #
 # RESEND_API_KEY is optional — the contact form works without it
 # (messages still land in Supabase, visible in /admin/messages). Set it
