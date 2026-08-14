@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Public marketing/product pages only. /dashboard and /admin are
+  deliberately excluded — private, already Disallow'd in robots.txt.
+  Admin panel gets its own public-facing pages later; add here once
+  that happens.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://visor-a.com/</loc>
