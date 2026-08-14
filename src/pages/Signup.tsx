@@ -1,8 +1,15 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { usePageMeta } from '../lib/usePageMeta';
 
 export default function Signup() {
+  usePageMeta({
+    title: 'Sign Up',
+    description: 'Create a free Visora account — 500 renders/month, no credit card required.',
+    path: '/signup',
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);

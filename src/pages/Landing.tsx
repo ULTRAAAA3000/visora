@@ -7,8 +7,17 @@ import ServicesSection from '../components/landing/ServicesSection';
 import ProjectsSection from '../components/landing/ProjectsSection';
 import PricingSection from '../components/landing/PricingSection';
 import Footer from '../components/landing/Footer';
+import { usePageMeta } from '../lib/usePageMeta';
 
 export default function Landing() {
+  usePageMeta({
+    title: 'Visora — Images your brand never gets wrong.',
+    description:
+      'Turn HTML and Tailwind templates into OG images, product banners, and certificates — rendered by real Chromium, not a language model guessing at pixels.',
+    path: '/',
+    suffix: false,
+  });
+
   const location = useLocation();
 
   useEffect(() => {

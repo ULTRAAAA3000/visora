@@ -4,6 +4,7 @@ import { Crown, FileCode2 } from 'lucide-react';
 import SiteHeader from '../../components/landing/SiteHeader';
 import Footer from '../../components/landing/Footer';
 import { supabase } from '../../lib/supabase';
+import { usePageMeta } from '../../lib/usePageMeta';
 import type { TemplateGalleryEntry } from '../../lib/database.types';
 
 /**
@@ -14,6 +15,13 @@ import type { TemplateGalleryEntry } from '../../lib/database.types';
  * of silently disappearing for logged-out visitors. See migration 0010.
  */
 export default function TemplatesPublic() {
+  usePageMeta({
+    title: 'Template Gallery',
+    description:
+      '30+ ready-made templates for OG images, product banners, certificates, and social cards — Free, Pro, and Agency-exclusive designs, usable with no HTML/CSS writing required.',
+    path: '/templates',
+  });
+
   const [templates, setTemplates] = useState<TemplateGalleryEntry[]>([]);
   const [loading, setLoading] = useState(true);
 

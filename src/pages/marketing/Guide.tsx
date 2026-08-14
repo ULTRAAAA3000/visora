@@ -1,8 +1,16 @@
 import SiteHeader from '../../components/landing/SiteHeader';
 import Footer from '../../components/landing/Footer';
 import GuideBody from '../../components/guide/GuideBody';
+import { usePageMeta } from '../../lib/usePageMeta';
 
 export default function Guide() {
+  usePageMeta({
+    title: 'Getting Started Guide',
+    description:
+      "Three ways to use Visora — by hand, no-code automation, or the API — written for anyone, whether you've never used an API or have your own developer.",
+    path: '/guide',
+  });
+
   return (
     <div className="bg-black min-h-screen">
       <SiteHeader transparentAtTop={false} />

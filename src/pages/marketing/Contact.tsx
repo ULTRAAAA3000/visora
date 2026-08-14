@@ -2,12 +2,19 @@ import { useState } from 'react';
 import { Send, Check } from 'lucide-react';
 import SiteHeader from '../../components/landing/SiteHeader';
 import Footer from '../../components/landing/Footer';
+import { usePageMeta } from '../../lib/usePageMeta';
 
 const CONTACT_EMAIL = 'visora.image@gmail.com';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
 export default function Contact() {
+  usePageMeta({
+    title: 'Contact',
+    description: 'Questions, bug reports, feature requests, or partnership inquiries — reach the Visora team directly.',
+    path: '/contact',
+  });
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');

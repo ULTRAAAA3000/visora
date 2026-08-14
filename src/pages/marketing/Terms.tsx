@@ -1,6 +1,7 @@
 import SiteHeader from '../../components/landing/SiteHeader';
 import Footer from '../../components/landing/Footer';
 import type { ReactNode } from 'react';
+import { usePageMeta } from '../../lib/usePageMeta';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -12,6 +13,12 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export default function Terms() {
+  usePageMeta({
+    title: 'Terms of Service',
+    description: "The terms covering your use of Visora's API, dashboard, and rendering service.",
+    path: '/terms',
+  });
+
   return (
     <div className="bg-black min-h-screen">
       <SiteHeader transparentAtTop={false} />

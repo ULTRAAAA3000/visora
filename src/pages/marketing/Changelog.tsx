@@ -1,5 +1,6 @@
 import SiteHeader from '../../components/landing/SiteHeader';
 import Footer from '../../components/landing/Footer';
+import { usePageMeta } from '../../lib/usePageMeta';
 
 interface Entry {
   date: string;
@@ -45,6 +46,12 @@ const ENTRIES: Entry[] = [
 ];
 
 export default function Changelog() {
+  usePageMeta({
+    title: 'Changelog',
+    description: "What's shipped in Visora, in order — new templates, API features, integrations, and fixes.",
+    path: '/changelog',
+  });
+
   return (
     <div className="bg-black min-h-screen">
       <SiteHeader transparentAtTop={false} />

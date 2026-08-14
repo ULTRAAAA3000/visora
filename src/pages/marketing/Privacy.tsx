@@ -1,6 +1,7 @@
 import SiteHeader from '../../components/landing/SiteHeader';
 import Footer from '../../components/landing/Footer';
 import type { ReactNode } from 'react';
+import { usePageMeta } from '../../lib/usePageMeta';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -12,6 +13,12 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 export default function Privacy() {
+  usePageMeta({
+    title: 'Privacy Policy',
+    description: 'What data Visora collects, which third parties process it (Supabase, Cloudflare, our payment provider), and how to exercise your rights.',
+    path: '/privacy',
+  });
+
   return (
     <div className="bg-black min-h-screen">
       <SiteHeader transparentAtTop={false} />

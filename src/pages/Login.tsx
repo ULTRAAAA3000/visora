@@ -1,8 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { usePageMeta } from '../lib/usePageMeta';
 
 export default function Login() {
+  usePageMeta({ title: 'Log In', description: 'Log in to your Visora dashboard.', path: '/login' });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);

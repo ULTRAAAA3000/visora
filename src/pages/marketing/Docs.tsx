@@ -1,5 +1,6 @@
 import SiteHeader from '../../components/landing/SiteHeader';
 import Footer from '../../components/landing/Footer';
+import { usePageMeta } from '../../lib/usePageMeta';
 
 function CodeBlock({ children }: { children: string }) {
   return (
@@ -30,6 +31,13 @@ const TOC = [
 ];
 
 export default function Docs() {
+  usePageMeta({
+    title: 'API Documentation',
+    description:
+      'Full Visora API reference: authentication, the render endpoint, request/response shapes, error codes, rate limits, webhooks, and no-code integrations.',
+    path: '/docs',
+  });
+
   return (
     <div className="bg-black min-h-screen">
       <SiteHeader transparentAtTop={false} />
