@@ -1,4 +1,3 @@
-import { Github } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PrimaryButton } from './Buttons';
 
@@ -81,23 +80,12 @@ export default function Footer() {
                 Get an API key
               </Link>
             </li>
-            <li>
-              <a
-                href="https://github.com/ULTRAAAA3000/visora"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[#D7E2EA]/70 hover:text-white transition-colors text-sm"
-              >
-                <Github className="w-3.5 h-3.5" />
-                GitHub
-              </a>
-            </li>
           </ul>
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
+      <div className="max-w-6xl mx-auto flex items-center justify-center pt-8">
         <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
           <p className="text-white/30 text-xs">&copy; {new Date().getFullYear()} Visora. All rights reserved.</p>
           <Link to="/privacy" className="text-white/30 hover:text-white/60 transition-colors text-xs">
@@ -115,15 +103,6 @@ export default function Footer() {
             Powered by WYSB
           </a>
         </div>
-        <a
-          href="https://github.com/ULTRAAAA3000/visora"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center w-9 h-9 rounded-full liquid-glass hover:bg-white/10 transition-colors"
-          aria-label="Visora on GitHub"
-        >
-          <Github className="w-4 h-4 text-white/70" />
-        </a>
       </div>
     </footer>
   );
