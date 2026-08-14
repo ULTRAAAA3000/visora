@@ -3,10 +3,15 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
 
 export default function AdminRoute({ children }: { children: ReactNode }) {
-  const { session, profile, loading } = useAuth();
+  const { session, profile, loading, profileLoading } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  // Both flags matter: `loading` covers the initial session check, but
+  // `profile` (where is_admin lives) loads in a separate effect after
+  // that. Checking is_admin before profileLoading finishes means it's
+  // still null on every fresh load/refresh — bouncing real admins to
+  // /dashboard before their own profile has even arrived.
+  if (loading || (session && profileLoading)) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <p className="text-gray-400 text-sm">Loading…</p>

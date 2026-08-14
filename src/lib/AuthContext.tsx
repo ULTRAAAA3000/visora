@@ -9,6 +9,7 @@ interface AuthContextValue {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  profileLoading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -49,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -75,15 +77,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!session?.user) {
       setProfile(null);
+      setProfileLoading(false);
       return;
     }
 
     let isMounted = true;
+    setProfileLoading(true);
     ensureProfile(session.user)
       .then((p) => {
         if (isMounted) setProfile(p);
       })
-      .catch((err) => console.error('Failed to load/create profile', err));
+      .catch((err) => console.error('Failed to load/create profile', err))
+      .finally(() => {
+        if (isMounted) setProfileLoading(false);
+      });
 
     return () => {
       isMounted = false;
@@ -105,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user: session?.user ?? null,
     profile,
     loading,
+    profileLoading,
     refreshProfile,
     signOut,
   };
