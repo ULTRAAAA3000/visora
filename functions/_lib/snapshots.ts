@@ -15,6 +15,43 @@ const SHARED_HEAD = `
   <meta property="og:image" content="https://visor-a.com/og-image.png" />
 `;
 
+export function aboutSnapshot(): string {
+  return `<!doctype html>
+<html lang="en">
+<head>
+${SHARED_HEAD}
+  <title>About — Visora</title>
+  <meta name="description" content="Why Visora exists, how it actually renders images, and who builds it — a small, API-first tool for developers who need brand-accurate images at scale." />
+</head>
+<body>
+  <main>
+    <p>About</p>
+    <h1>Images your brand never gets wrong.</h1>
+
+    <h2>Why Visora exists</h2>
+    <p>Most "generate an image" tools today are a diffusion model guessing at pixels — close enough for a mood board, not close enough for a logo that has to land in the exact same spot on every single render. Brand assets, product banners, certificates — anything with a fixed layout — need to be exact, not approximately right.</p>
+    <p>Visora exists to be the boring, reliable version of that: give it a template and some data, get back the same pixel-perfect image every time, because it isn't generating anything — it's rendering real HTML and Tailwind CSS in a real browser and taking a screenshot.</p>
+
+    <h2>How it actually works</h2>
+    <p>Under the hood, every render spins up a real headless Chromium instance (via Cloudflare's Browser Rendering), loads your template with the data filled in, and screenshots it. That means anything CSS can do — gradients, custom fonts, flexbox and grid layouts, Tailwind utility classes — renders exactly as it would in a browser, because it is a browser. No model in the loop, nothing to hallucinate.</p>
+    <p>Identical requests are served from cache instead of re-rendering, so the same template with the same data comes back in milliseconds on repeat calls — and the image URL stays stable until you actually change the template.</p>
+
+    <h2>Who's behind it</h2>
+    <p>Visora is built and operated out of Ukraine as a small, independent, API-first product — not a venture-backed platform with a growth team.</p>
+
+    <h2>Get in touch</h2>
+    <p>Questions, bug reports, feature requests, or partnership inquiries — reach out via the contact page. Or take a look at the API docs and template gallery to see what it can do.</p>
+
+    <nav>
+      <a href="/">Home</a>
+      <a href="/docs">API documentation</a>
+      <a href="/contact">Contact</a>
+    </nav>
+  </main>
+</body>
+</html>`;
+}
+
 export function homepageSnapshot(): string {
   return `<!doctype html>
 <html lang="en">

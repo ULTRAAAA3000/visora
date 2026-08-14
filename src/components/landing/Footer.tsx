@@ -2,15 +2,15 @@ import { Link } from 'react-router-dom';
 import { PrimaryButton } from './Buttons';
 
 const PRODUCT_LINKS = [
-  { label: 'OG Images', href: '#services' },
-  { label: 'Product Banners', href: '#services' },
-  { label: 'Certificates & Badges', href: '#services' },
+  { label: 'OG Images', href: '/#services' },
+  { label: 'Product Banners', href: '/#services' },
+  { label: 'Certificates & Badges', href: '/#services' },
   { label: 'Templates gallery', href: '/signup' },
 ];
 
 const COMPANY_LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Showcase', href: '#showcase' },
+  { label: 'About', href: '/about' },
+  { label: 'Showcase', href: '/#showcase' },
   { label: 'Contact', href: '/contact' },
 ];
 

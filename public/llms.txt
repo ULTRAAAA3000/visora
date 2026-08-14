@@ -26,6 +26,7 @@ Pricing: Free tier (500 renders/month, 1 API key), Pro $19/month (20,000 renders
 
 ## Company
 
+- [About](https://visor-a.com/about): Why Visora exists, how the rendering actually works, who builds it.
 - [Pricing](https://visor-a.com/#pricing)
 - [Contact](https://visor-a.com/contact)
 - [Privacy Policy](https://visor-a.com/privacy)

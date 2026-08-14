@@ -15,6 +15,7 @@ import ResetPassword from './pages/ResetPassword';
 import Connect from './pages/Connect';
 import Docs from './pages/marketing/Docs';
 import Guide from './pages/marketing/Guide';
+import About from './pages/marketing/About';
 import Privacy from './pages/marketing/Privacy';
 import Terms from './pages/marketing/Terms';
 import NotFound from './pages/NotFound';
@@ -65,6 +66,7 @@ ReactDOM.createRoot(rootElement).render(
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/docs" element={<Docs />} />
           <Route path="/guide" element={<Guide />} />
+          <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/templates" element={<TemplatesPublic />} />

@@ -17,6 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: 'Guide', href: '/guide', kind: 'route' },
   { name: 'Pricing', href: '/#pricing', kind: 'hash' },
   { name: 'Showcase', href: '/#showcase', kind: 'hash' },
+  { name: 'About', href: '/about', kind: 'route' },
   { name: 'Changelog', href: '/changelog', kind: 'route' },
 ];
 
