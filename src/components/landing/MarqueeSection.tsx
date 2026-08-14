@@ -10,7 +10,7 @@ function tripled(row: MockupVariant[]) {
 }
 
 function tileClass(variant: MockupVariant) {
-  return `visora.io/render/${variant}.png`;
+  return `visor-a.com/render/${variant}.png`;
 }
 
 const TILE_SIZE = 'w-[220px] h-[142px] sm:w-[320px] sm:h-[206px] md:w-[420px] md:h-[270px] shrink-0';

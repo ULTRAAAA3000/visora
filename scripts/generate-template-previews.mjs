@@ -7,7 +7,7 @@
 // Usage:
 //   SUPABASE_URL=... \
 //   SUPABASE_SERVICE_ROLE_KEY=... \
-//   VISORA_API_URL=https://visora-render-worker.mrcru96.workers.dev \
+//   VISORA_API_URL=https://api.visor-a.com \
 //   VISORA_API_KEY=VISORA_LIVE_... \
 //     node scripts/generate-template-previews.mjs
 //

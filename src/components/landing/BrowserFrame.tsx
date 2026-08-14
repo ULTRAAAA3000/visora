@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
  */
 export default function BrowserFrame({
   children,
-  url = 'visora.io/render',
+  url = 'visor-a.com/render',
   className = '',
 }: {
   children: ReactNode;

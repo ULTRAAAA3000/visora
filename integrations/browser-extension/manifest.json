@@ -26,13 +26,14 @@
   },
   "permissions": ["storage", "contextMenus"],
   "host_permissions": [
+    "https://api.visor-a.com/*",
     "https://*.workers.dev/*",
     "https://*.pages.dev/*"
   ],
   "optional_host_permissions": ["https://*/*"],
   "browser_specific_settings": {
     "gecko": {
-      "id": "connect@visora.io",
+      "id": "connect@visor-a.com",
       "strict_min_version": "109.0"
     }
   }

@@ -36,9 +36,7 @@ npx wrangler secret put TELEGRAM_WEBHOOK_SECRET   # any random string you choose
 npx wrangler secret put SUPABASE_URL
 npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 
-# 3. Update [vars] in wrangler.toml if VISORA_APP_URL / VISORA_API_URL
-#    aren't on visora.io yet (they aren't, pre domain-migration — point
-#    them at your current Pages/Worker *.workers.dev URLs).
+# 3. [vars] in wrangler.toml already point at visor-a.com / api.visor-a.com.
 
 npm run deploy
 ```
@@ -55,7 +53,7 @@ deploying (replace the placeholders):
 curl -X POST "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://<your-worker>.workers.dev/webhook",
+    "url": "https://api.visor-a.com/webhook",
     "secret_token": "<same value as TELEGRAM_WEBHOOK_SECRET>"
   }'
 ```

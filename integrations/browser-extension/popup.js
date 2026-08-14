@@ -1,8 +1,8 @@
 const api = typeof browser !== 'undefined' ? browser : chrome;
 
 const DEFAULTS = {
-  appUrl: 'https://visora-2kq.pages.dev',
-  apiUrl: 'https://visora-render-worker.mrcru96.workers.dev',
+  appUrl: 'https://visor-a.com',
+  apiUrl: 'https://api.visor-a.com',
 };
 
 const el = (id) => document.getElementById(id);

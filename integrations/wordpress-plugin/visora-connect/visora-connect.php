@@ -7,14 +7,14 @@
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            Visora
- * Author URI:        https://visora.io
+ * Author URI:        https://visor-a.com
  * License:            GPL v2 or later
  * License URI:        https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:        visora-connect
  *
  * Core funnel: this plugin's whole job is to get the site owner an API
  * key with as little friction as possible. Click "Connect to Visora",
- * log in (or sign up) on visora.io, approve, land back here with the
+ * log in (or sign up) on visor-a.com, approve, land back here with the
  * key already saved. Everything else (the render shortcode) is a
  * convenience on top of that.
  */
@@ -28,12 +28,8 @@ define( 'VISORA_CONNECT_FILE', __FILE__ );
 define( 'VISORA_CONNECT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'VISORA_CONNECT_URL', plugin_dir_url( __FILE__ ) );
 
-// Defaults — visora.io doesn't exist yet (custom domain migration is
-// tracked on the roadmap); site owners on Settings > Visora can point
-// these at whatever the current Cloudflare Pages / Worker URLs are
-// until then.
-define( 'VISORA_CONNECT_DEFAULT_APP_URL', 'https://app.visora.io' );
-define( 'VISORA_CONNECT_DEFAULT_API_URL', 'https://api.visora.io' );
+define( 'VISORA_CONNECT_DEFAULT_APP_URL', 'https://visor-a.com' );
+define( 'VISORA_CONNECT_DEFAULT_API_URL', 'https://api.visor-a.com' );
 
 /**
  * Small wrapper around get_option() with a fallback — used everywhere
