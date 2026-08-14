@@ -72,7 +72,7 @@ export async function handleContact(request: Request, env: Env, supabase: Supaba
           'content-type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Visora <contact@visora.io>', // update once the sending domain is verified in Resend
+          from: 'Visora <contact@visor-a.com>', // update once the sending domain is verified in Resend
           to: [CONTACT_EMAIL],
           reply_to: email,
           subject: subject ? `[Visora contact] ${subject}` : '[Visora contact] New message',

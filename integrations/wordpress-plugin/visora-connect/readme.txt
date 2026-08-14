@@ -20,7 +20,7 @@ rendered images anywhere.
 
 **What this plugin does:**
 
-1. **Connect** — click one button, log in (or sign up) on visora.io,
+1. **Connect** — click one button, log in (or sign up) on visor-a.com,
    approve, and your API key is saved automatically. No copy-pasting
    keys between tabs.
 2. **Render** — use `[visora_render template="tpl_id" title="..."]`

@@ -20,7 +20,7 @@ export default function Privacy() {
         <p className="text-xs uppercase tracking-widest text-white/40 mb-3">Legal</p>
         <h1 className="text-4xl font-bold text-white mb-3">Privacy Policy</h1>
         <p className="text-sm text-[#D7E2EA]/50 mb-14">
-          Last updated: August 13, 2026. Applies to visora.io and its dashboard, API, and connected
+          Last updated: August 13, 2026. Applies to visor-a.com and its dashboard, API, and connected
           integrations (WordPress plugin, Telegram bot, Make.com app, browser extension).
         </p>
 
