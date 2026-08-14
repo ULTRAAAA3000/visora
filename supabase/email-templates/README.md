@@ -30,8 +30,8 @@ signed in. For Supabase to allow that redirect (and the reset-password one
 above), whitelist your Pages domain:
 
 1. Supabase Dashboard → **Authentication → URL Configuration**
-2. **Site URL**: `https://<your-project>.pages.dev` (or your custom domain)
-3. **Redirect URLs**: add `https://<your-project>.pages.dev/**`
+2. **Site URL**: `https://visor-a.com`
+3. **Redirect URLs**: add `https://visor-a.com/**`
    (the `/**` wildcard covers `/dashboard`, `/login`, `/reset-password`,
    previews, etc.)
 4. Save
@@ -39,9 +39,9 @@ above), whitelist your Pages domain:
 Without step 3, Supabase rejects the redirect with "requested path is
 invalid" and falls back to the Site URL's root instead of the intended page.
 
-**When you migrate to a custom domain**: update Site URL + Redirect URLs
-here to match, or every link in every email sent after that keeps pointing
-at the old `*.pages.dev` address.
+**Not done automatically**: this is a Dashboard setting, not something a
+git push touches — go set it now if you haven't, otherwise every auth
+email link still points at the old `*.pages.dev` address.
 
 ## 4. Optional: also update remaining auth emails
 
