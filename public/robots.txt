@@ -4,4 +4,4 @@ Disallow: /dashboard
 Disallow: /admin
 Disallow: /reset-password
 
-Sitemap: https://visora-2kq.pages.dev/sitemap.xml
+Sitemap: https://visor-a.com/sitemap.xml
