@@ -1,0 +1,36 @@
+# Visora
+
+> Visora is an API-first tool that turns HTML and Tailwind CSS templates into images — OG images, product banners, certificates, social cards — rendered by real headless Chromium (not a diffusion model guessing at pixels). One API call in, a CDN-hosted PNG/JPEG URL out, typically under 150ms.
+
+Visora is built for developers and no-code builders who need pixel-perfect, on-brand images generated programmatically at scale: dynamic OG images for blog posts, e-commerce product banners, event certificates, social media cards, and similar templated visual content.
+
+Core mechanics:
+- Send a `template_id` (a preset or your own custom HTML/Tailwind) plus a `data` object of variables to fill in.
+- Visora renders that template in a real Chromium instance via Cloudflare's Browser Rendering, screenshots it, and returns a hosted image URL.
+- Because it's real browser rendering, arbitrary CSS (gradients, flexbox/grid, custom fonts, Tailwind utility classes) renders exactly as it would in a browser — no approximation.
+
+Pricing: Free tier (500 renders/month, 1 API key), Pro $19/month (20,000 renders/month, 5 API keys, 4K output, webhooks), Agency $49/month (100,000 renders/month, unlimited API keys, agency-exclusive templates, priority queue). Full comparison at https://visor-a.com/#pricing.
+
+## Docs
+
+- [API Reference](https://visor-a.com/docs): Full REST API docs — authentication, the render endpoint, request/response shapes, error codes, rate limits, webhooks.
+- [Guide](https://visor-a.com/guide): Plain-language walkthrough for both technical and non-technical users, including the actual curl example for developers.
+- [Template gallery](https://visor-a.com/templates): Browsable library of preset templates (OG images, e-commerce, certificates, events, agency-exclusive designs) usable via `template_id` with no HTML/CSS writing required.
+
+## Integrations
+
+- [WordPress plugin](https://visor-a.com/docs#integrations): `[visora_render]` shortcode, connects via API key.
+- [Make.com app](https://visor-a.com/docs#integrations): `Render Image` action for no-code automation scenarios.
+- [Telegram bot](https://visor-a.com/docs#integrations): `/render` and related commands.
+- [Browser extension](https://visor-a.com/docs#integrations): Chrome/Firefox, right-click any selected text to render it.
+
+## Company
+
+- [Pricing](https://visor-a.com/#pricing)
+- [Contact](https://visor-a.com/contact)
+- [Privacy Policy](https://visor-a.com/privacy)
+- [Terms of Service](https://visor-a.com/terms)
+
+## Optional
+
+- [Changelog](https://visor-a.com/changelog): Recent product updates.
