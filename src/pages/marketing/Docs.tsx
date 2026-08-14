@@ -60,8 +60,7 @@ export default function Docs() {
             headless Chromium, typically in under 150ms.
           </p>
           <p className="text-sm text-white/40 mb-16">
-            Replace <code className="text-white/60">your-worker.workers.dev</code> below with your actual Worker
-            URL from the Cloudflare dashboard (or your custom domain, once it's connected).
+            All requests go to <code className="text-white/60">api.visor-a.com</code>.
           </p>
 
           <Section id="authentication" title="Authentication">
@@ -79,7 +78,7 @@ export default function Docs() {
           <Section id="endpoint" title="Render endpoint">
             <p>
               <code className="text-white">POST</code>{' '}
-              <code className="text-white">https://your-worker.workers.dev/api/v1/render</code>
+              <code className="text-white">https://api.visor-a.com/api/v1/render</code>
             </p>
             <p>Renders a template with your data and returns a JSON response containing the image URL.</p>
           </Section>
@@ -119,7 +118,7 @@ export default function Docs() {
   "render_time": "89ms",
   "cached": false,
   "data": {
-    "url": "https://your-worker.workers.dev/renders/cache/3f9a…c2.png",
+    "url": "https://api.visor-a.com/renders/cache/3f9a…c2.png",
     "width": 1200,
     "height": 630,
     "format": "png"
@@ -269,7 +268,7 @@ if (\`sha256=\${expected}\` !== req.headers['x-visora-signature']) {
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-8">
             <p className="text-sm text-white/50 mb-2">Full example</p>
-            <CodeBlock>{`curl -X POST https://your-worker.workers.dev/api/v1/render \\
+            <CodeBlock>{`curl -X POST https://api.visor-a.com/api/v1/render \\
   -H "Authorization: Bearer VISORA_LIVE_..." \\
   -H "Content-Type: application/json" \\
   -d '{

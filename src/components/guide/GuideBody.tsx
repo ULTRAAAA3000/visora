@@ -217,7 +217,7 @@ export default function GuideBody() {
 
       <Section title="For developers: the actual API call" id="for-developers">
         <p className="mb-4">One endpoint. Send your template ID and data, get back an image URL.</p>
-        <CodeBlock>{`curl -X POST https://<your-worker>.workers.dev/api/v1/render \\
+        <CodeBlock>{`curl -X POST https://api.visor-a.com/api/v1/render \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
