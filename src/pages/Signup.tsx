@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { usePageMeta } from '../lib/usePageMeta';
+import Turnstile, { type TurnstileHandle } from '../components/Turnstile';
 
 export default function Signup() {
   usePageMeta({
@@ -15,11 +16,20 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (turnstileSiteKey && !captchaToken) {
+      setError('Please complete the verification challenge.');
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
@@ -28,10 +38,14 @@ export default function Signup() {
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
+        ...(captchaToken ? { captchaToken } : {}),
       },
     });
 
     setSubmitting(false);
+    turnstileRef.current?.reset();
+    setCaptchaToken(null);
+
     if (signUpError) {
       setError(signUpError.message);
       return;
@@ -99,6 +113,15 @@ export default function Signup() {
                 placeholder="At least 8 characters"
               />
             </div>
+
+            {turnstileSiteKey && (
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={turnstileSiteKey}
+                onVerify={setCaptchaToken}
+                onExpire={() => setCaptchaToken(null)}
+              />
+            )}
 
             {error && <p className="text-sm text-red-400">{error}</p>}
 
