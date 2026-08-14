@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { usePageMeta } from '../lib/usePageMeta';
+import Turnstile, { type TurnstileHandle } from '../components/Turnstile';
 
 export default function Login() {
   usePageMeta({ title: 'Log In', description: 'Log in to your Visora dashboard.', path: '/login' });
@@ -10,6 +11,9 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,12 +22,27 @@ export default function Login() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (turnstileSiteKey && !captchaToken) {
+      setError('Please complete the verification challenge.');
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: {
+        ...(captchaToken ? { captchaToken } : {}),
+      },
+    });
 
     setSubmitting(false);
+    turnstileRef.current?.reset();
+    setCaptchaToken(null);
+
     if (signInError) {
       setError(signInError.message);
       return;
@@ -70,6 +89,15 @@ export default function Login() {
                 placeholder="••••••••"
               />
             </div>
+
+            {turnstileSiteKey && (
+              <Turnstile
+                ref={turnstileRef}
+                siteKey={turnstileSiteKey}
+                onVerify={setCaptchaToken}
+                onExpire={() => setCaptchaToken(null)}
+              />
+            )}
 
             {error && <p className="text-sm text-red-400">{error}</p>}
 
