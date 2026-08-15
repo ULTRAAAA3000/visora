@@ -1,15 +1,15 @@
 import { Check, Minus, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/AuthContext';
-import { openCheckout, isCheckoutConfigured, type PaidPlan } from '../../lib/lemonsqueezy';
+import { openCheckout, isCheckoutConfigured, type PaidPlan } from '../../lib/paddle';
 import FadeIn from './FadeIn';
 import { GhostButton } from './Buttons';
 
 /**
- * Feature-comparison pricing table, wired to real LemonSqueezy overlay
- * checkout for Pro/Agency (see src/lib/lemonsqueezy.ts). Prices below
- * are the live numbers — keep in sync with the actual variant prices
- * in the LemonSqueezy dashboard and with QUOTA_BY_TIER in
+ * Feature-comparison pricing table, wired to real Paddle overlay
+ * checkout for Pro/Agency (see src/lib/paddle.ts). Prices below
+ * are the live numbers — keep in sync with the actual price IDs
+ * in the Paddle dashboard and with QUOTA_BY_TIER in
  * worker/src/lib/billing.ts. Tiers mirror the real `plan_tier` values
  * templates are gated on ('free' | 'pro' | 'agency').
  */

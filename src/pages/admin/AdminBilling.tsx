@@ -3,10 +3,7 @@ import { AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { Profile } from '../../lib/database.types';
 
-type Row = Pick<
-  Profile,
-  'id' | 'email' | 'plan_tier' | 'subscription_status' | 'plan_renews_at' | 'lemonsqueezy_customer_id'
->;
+type Row = Pick<Profile, 'id' | 'email' | 'plan_tier' | 'subscription_status' | 'plan_renews_at' | 'paddle_customer_id'>;
 
 export default function AdminBilling() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -15,7 +12,7 @@ export default function AdminBilling() {
   useEffect(() => {
     supabase
       .from('profiles')
-      .select('id, email, plan_tier, subscription_status, plan_renews_at, lemonsqueezy_customer_id')
+      .select('id, email, plan_tier, subscription_status, plan_renews_at, paddle_customer_id')
       .neq('plan_tier', 'free')
       .order('plan_renews_at', { ascending: true })
       .then(({ data, error }) => {
@@ -32,9 +29,8 @@ export default function AdminBilling() {
       <div className="flex items-start gap-3 rounded-xl border border-amber-400/20 bg-amber-400/5 px-4 py-3 mb-6">
         <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
         <p className="text-xs text-amber-200/80 leading-relaxed">
-          LemonSqueezy is being replaced (regional payment restrictions) — Paddle or Dodo Payments, TBD. Existing
-          subscription data below is from the LemonSqueezy webhook and won't reflect the new provider until that
-          migration lands.
+          Billing runs on Paddle. The webhook + checkout code is wired up in the codebase, but the products/prices
+          and Paddle-side setup are pending — this list will populate once that's live.
         </p>
       </div>
 

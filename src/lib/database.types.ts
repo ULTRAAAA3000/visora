@@ -27,8 +27,8 @@ export type Profile = {
   monthly_quota: number;
   usage_this_month: number;
   onboarding_completed_at: string | null;
-  lemonsqueezy_customer_id: string | null;
-  lemonsqueezy_subscription_id: string | null;
+  paddle_customer_id: string | null;
+  paddle_subscription_id: string | null;
   subscription_status: string | null;
   plan_renews_at: string | null;
   is_admin: boolean;
@@ -129,8 +129,8 @@ export type Database = {
           monthly_quota?: number;
           usage_this_month?: number;
           onboarding_completed_at?: string | null;
-          lemonsqueezy_customer_id?: string | null;
-          lemonsqueezy_subscription_id?: string | null;
+          paddle_customer_id?: string | null;
+          paddle_subscription_id?: string | null;
           subscription_status?: string | null;
           plan_renews_at?: string | null;
           is_admin?: boolean;
@@ -146,8 +146,8 @@ export type Database = {
           monthly_quota?: number;
           usage_this_month?: number;
           onboarding_completed_at?: string | null;
-          lemonsqueezy_customer_id?: string | null;
-          lemonsqueezy_subscription_id?: string | null;
+          paddle_customer_id?: string | null;
+          paddle_subscription_id?: string | null;
           subscription_status?: string | null;
           plan_renews_at?: string | null;
           is_admin?: boolean;

@@ -59,7 +59,7 @@ export default function Privacy() {
           <p>
             <strong className="text-white">Payment data:</strong> if you're on a paid plan, our payment
             provider handles your card details directly — we never see or store full card numbers. We
-            currently use LemonSqueezy, transitioning to a new payment provider soon.
+            use Paddle, who also acts as merchant of record for the transaction.
           </p>
         </Section>
 
@@ -74,7 +74,8 @@ export default function Privacy() {
               Browser Rendering), and image storage (R2)
             </li>
             <li>
-              <strong className="text-white">LemonSqueezy</strong> — payment processing for paid plans
+              <strong className="text-white">Paddle</strong> — payment processing for paid plans (also acts as
+              merchant of record)
             </li>
           </ul>
           <p>

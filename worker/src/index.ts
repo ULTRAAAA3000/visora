@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 import { authenticate, json } from './lib/auth';
-import { handleLemonSqueezyWebhook } from './lib/billing';
+import { handlePaddleWebhook } from './lib/billing';
 import { computeCacheKey } from './lib/cache';
 import { handleContact } from './lib/contact';
 import { fillTemplate, renderHtmlToImage, type TemplateVariables } from './lib/render';
@@ -87,9 +87,9 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
       return handleTrack(request, supabase);
     }
 
-    if (request.method === 'POST' && url.pathname === '/webhooks/lemonsqueezy') {
+    if (request.method === 'POST' && url.pathname === '/webhooks/paddle') {
       const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
-      return handleLemonSqueezyWebhook(request, env.LEMONSQUEEZY_WEBHOOK_SECRET, supabase);
+      return handlePaddleWebhook(request, env.PADDLE_WEBHOOK_SECRET, supabase);
     }
 
     return new Response('Not found', { status: 404 });
