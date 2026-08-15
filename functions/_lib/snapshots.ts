@@ -37,7 +37,7 @@ ${SHARED_HEAD}
     <p>Identical requests are served from cache instead of re-rendering, so the same template with the same data comes back in milliseconds on repeat calls — and the image URL stays stable until you actually change the template.</p>
 
     <h2>Who's behind it</h2>
-    <p>Visora is built and operated out of Ukraine as a small, independent, API-first product — not a venture-backed platform with a growth team.</p>
+    <p>Visora is built and operated by Artem Shynkarenko, based in Ukraine, as a small, independent, API-first product — not a venture-backed platform with a growth team.</p>
 
     <h2>Get in touch</h2>
     <p>Questions, bug reports, feature requests, or partnership inquiries — reach out via the contact page. Or take a look at the API docs and template gallery to see what it can do.</p>
@@ -355,7 +355,7 @@ ${SHARED_HEAD}
 <body>
   <main>
     <h1>Terms of Service</h1>
-    <p>These terms govern your use of Visora — the dashboard, API, and any connected integration — operated out of Ukraine. By creating an account, you agree to them.</p>
+    <p>These terms govern your use of Visora — the dashboard, API, and any connected integration — operated by Artem Shynkarenko, based in Ukraine. By creating an account, you agree to them.</p>
     <h2>Your account</h2>
     <p>You're responsible for your account credentials and API key. Regenerate it immediately from the dashboard if it leaks.</p>
     <h2>Acceptable use</h2>
@@ -394,7 +394,7 @@ ${SHARED_HEAD}
 <body>
   <main>
     <h1>Privacy Policy</h1>
-    <p>Visora is operated out of Ukraine. For anything in this policy, contact <a href="mailto:visora.image@gmail.com">visora.image@gmail.com</a>.</p>
+    <p>Visora is operated by Artem Shynkarenko, based in Ukraine. For anything in this policy, contact <a href="mailto:visora.image@gmail.com">visora.image@gmail.com</a>.</p>
     <h2>What we collect</h2>
     <p>Account data (email, password hashed by Supabase), templates and render data, usage data for quota enforcement, and payment data — handled directly by Paddle, our merchant of record; we never see full card numbers.</p>
     <h2>Third parties we rely on</h2>

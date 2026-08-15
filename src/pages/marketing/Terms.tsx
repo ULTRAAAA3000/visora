@@ -31,7 +31,8 @@ export default function Terms() {
         <Section title="1. What these terms cover">
           <p>
             These terms govern your use of Visora — the dashboard, API, and any connected integration
-            (WordPress plugin, Telegram bot, Make.com app, browser extension), operated out of Ukraine. By
+            (WordPress plugin, Telegram bot, Make.com app, browser extension), operated by Artem Shynkarenko,
+            based in Ukraine. By
             creating an account, you agree to them.
           </p>
         </Section>

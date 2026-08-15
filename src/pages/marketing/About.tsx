@@ -58,7 +58,8 @@ export default function About() {
 
         <Section title="Who's behind it">
           <p>
-            Visora is built and operated out of Ukraine as a small, independent, API-first product — not a
+            Visora is built and operated by Artem Shynkarenko, based in Ukraine, as a small, independent,
+            API-first product — not a
             venture-backed platform with a growth team. That means changes ship fast and support replies come
             from someone who actually built the thing, but also that Visora is one focused product rather than
             a suite trying to do everything.

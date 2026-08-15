@@ -33,7 +33,7 @@ export default function Privacy() {
 
         <Section title="Who this is">
           <p>
-            Visora is operated out of Ukraine. For anything in this policy, contact{' '}
+            Visora is operated by Artem Shynkarenko, based in Ukraine. For anything in this policy, contact{' '}
             <a href="mailto:visora.image@gmail.com" className="text-white underline underline-offset-2">
               visora.image@gmail.com
             </a>
@@ -131,7 +131,8 @@ export default function Privacy() {
               visora.image@gmail.com
             </a>
             . Depending on your location, you may have additional rights under laws like GDPR or CCPA;
-            Visora is operated out of Ukraine, and this policy is governed by Ukrainian law.
+            Visora is operated by Artem Shynkarenko, based in Ukraine, and this policy is governed by Ukrainian
+            law.
           </p>
         </Section>
 
