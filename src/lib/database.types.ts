@@ -91,6 +91,31 @@ export type TemplateGalleryEntry = {
   created_at: string;
 };
 
+export type BlockedIpRange = {
+  id: number;
+  cidr: string;
+  reason: string | null;
+  created_at: string;
+};
+
+export type SignupAttempt = {
+  id: number;
+  ip_address: string;
+  email: string | null;
+  blocked: boolean;
+  block_reason: string | null;
+  created_at: string;
+};
+
+export type SecuritySettingsRow = {
+  id: true;
+  max_signup_attempts_per_ip: number;
+  signup_window_hours: number;
+  max_login_failures_per_account: number;
+  login_lockout_window_minutes: number;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -226,6 +251,62 @@ export type Database = {
         };
         Relationships: [];
       };
+      blocked_ip_ranges: {
+        Row: BlockedIpRange;
+        Insert: {
+          id?: number;
+          cidr: string;
+          reason?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          cidr?: string;
+          reason?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      signup_attempts: {
+        Row: SignupAttempt;
+        Insert: {
+          id?: number;
+          ip_address: string;
+          email?: string | null;
+          blocked?: boolean;
+          block_reason?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          ip_address?: string;
+          email?: string | null;
+          blocked?: boolean;
+          block_reason?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      security_settings: {
+        Row: SecuritySettingsRow;
+        Insert: {
+          id?: true;
+          max_signup_attempts_per_ip?: number;
+          signup_window_hours?: number;
+          max_login_failures_per_account?: number;
+          login_lockout_window_minutes?: number;
+          updated_at?: string;
+        };
+        Update: {
+          id?: true;
+          max_signup_attempts_per_ip?: number;
+          signup_window_hours?: number;
+          max_login_failures_per_account?: number;
+          login_lockout_window_minutes?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       template_gallery: {
@@ -233,7 +314,18 @@ export type Database = {
         Relationships: [];
       };
     };
-    Functions: Record<string, never>;
+    Functions: {
+      admin_get_auth_audit_log: {
+        Args: { result_limit?: number };
+        Returns: {
+          id: string;
+          action: string | null;
+          email: string | null;
+          ip_address: string | null;
+          created_at: string;
+        }[];
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
