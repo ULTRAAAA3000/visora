@@ -35,6 +35,7 @@ import AdminOverview from './pages/admin/AdminOverview';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminBilling from './pages/admin/AdminBilling';
 import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminSecurity from './pages/admin/AdminSecurity';
 import AdminMessages from './pages/admin/AdminMessages';
 
 import './index.css';
@@ -111,6 +112,7 @@ ReactDOM.createRoot(rootElement).render(
             <Route path="users" element={<AdminUsers />} />
             <Route path="billing" element={<AdminBilling />} />
             <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="security" element={<AdminSecurity />} />
             <Route path="messages" element={<AdminMessages />} />
           </Route>
 

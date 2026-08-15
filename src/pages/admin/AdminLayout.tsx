@@ -1,6 +1,6 @@
 import { type ComponentType, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, CreditCard, LogOut, Menu, X, ShieldCheck, BarChart3, Mail } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, LogOut, Menu, X, ShieldCheck, BarChart3, Mail, Shield } from 'lucide-react';
 import { useAuth } from '../../lib/AuthContext';
 
 interface NavItem {
@@ -15,6 +15,7 @@ const navItems: NavItem[] = [
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/billing', label: 'Billing', icon: CreditCard },
   { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/admin/security', label: 'Security', icon: Shield },
   { to: '/admin/messages', label: 'Messages', icon: Mail },
 ];
 
