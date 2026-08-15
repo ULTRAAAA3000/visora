@@ -1,15 +1,21 @@
--- Bugfix: migration 0019 (contact_messages / page_views admin policies)
--- calls `public.is_admin(auth.uid())` — passing an argument — but 0016
--- only ever defined a zero-argument `public.is_admin()`. Postgres treats
--- those as different function signatures; calling a 0-arg function with
--- 1 argument is a hard error at CREATE POLICY time, not a silent no-op.
--- If migrations run as one transaction per file, this means 0019 likely
--- never actually committed — contact_messages/page_views admin access
--- silently missing ever since.
+-- Bugfix + recovery migration.
 --
--- Fix: add the 1-arg overload 0019 expects, calling the same logic, so
--- both call styles work going forward without touching the (already
--- shipped, working) zero-arg version other policies depend on.
+-- Root cause found live: migration 0019 (contact_messages / page_views)
+-- calls `public.is_admin(auth.uid())` — with an argument — but 0016
+-- only ever defined a zero-argument `public.is_admin()`. That's a
+-- different function signature in Postgres; calling it raises
+-- "function public.is_admin(uuid) does not exist" at CREATE POLICY
+-- time. Confirmed live: `public.contact_messages` doesn't exist at all
+-- in production, meaning 0019 was run as one script/transaction and the
+-- error on that later CREATE POLICY statement rolled back everything
+-- before it too — including the CREATE TABLE statements.
+--
+-- This migration is written to be safe to run regardless of exactly
+-- how much of 0019 landed: every statement is IF NOT EXISTS / OR
+-- REPLACE / DROP-then-CREATE, so re-running it is a no-op wherever
+-- 0019 already partially succeeded.
+
+-- The missing overload 0019 needs.
 CREATE OR REPLACE FUNCTION public.is_admin(check_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -20,9 +26,21 @@ AS $$
   SELECT COALESCE((SELECT is_admin FROM public.profiles WHERE id = check_user_id), FALSE);
 $$;
 
--- Re-run 0019's policies in case they never actually landed the first
--- time — DROP IF EXISTS first so this is safe to run whether or not
--- they already exist.
+-- Re-create 0019's tables if they didn't survive the rollback.
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT,
+  email TEXT NOT NULL,
+  subject TEXT,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_contact_messages_created_at ON public.contact_messages(created_at DESC);
+
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+
 DROP POLICY IF EXISTS "Admins can view contact messages" ON public.contact_messages;
 CREATE POLICY "Admins can view contact messages"
   ON public.contact_messages FOR SELECT
@@ -34,22 +52,36 @@ CREATE POLICY "Admins can update contact messages"
   USING (public.is_admin(auth.uid()))
   WITH CHECK (public.is_admin(auth.uid()));
 
+CREATE TABLE IF NOT EXISTS public.page_views (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  path TEXT NOT NULL,
+  referrer TEXT,
+  country TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON public.page_views(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_page_views_path ON public.page_views(path);
+
+ALTER TABLE public.page_views ENABLE ROW LEVEL SECURITY;
+
 DROP POLICY IF EXISTS "Admins can view page views" ON public.page_views;
 CREATE POLICY "Admins can view page views"
   ON public.page_views FOR SELECT
   USING (public.is_admin(auth.uid()));
 
 -- ---------------------------------------------------------------------
--- This does NOT set anyone as admin — that's still the manual step from
--- 0016, and is very likely the actual reason /admin keeps bouncing to
--- /dashboard (not a frontend bug): if that UPDATE was never run, or was
--- run against a different email than the one you actually log in with,
--- is_admin is FALSE and every redirect you're seeing is correct
--- behavior for a non-admin account.
+-- Also worth checking directly: everything from migrations 0020-0023
+-- that referenced tables/columns from earlier migrations could have
+-- the same "ran as one script, one bad statement rolled back
+-- everything" problem if any of them errored too. Run this to sanity
+-- check what actually exists right now:
 --
--- Run this in Supabase SQL Editor, with your real login email:
---   SELECT email, is_admin FROM public.profiles WHERE email = 'your@email.com';
--- If is_admin comes back false (or the row doesn't exist yet — it's
--- only created on first dashboard visit):
---   UPDATE public.profiles SET is_admin = TRUE WHERE email = 'your@email.com';
+--   SELECT table_name FROM information_schema.tables
+--   WHERE table_schema = 'public' ORDER BY table_name;
+--
+-- Expected (as of this migration): profiles, templates, render_logs,
+-- contact_messages, page_views, signup_attempts, blocked_ip_ranges,
+-- security_settings, login_failures, webhook_deliveries (0017),
+-- render_cache (0018) — plus the template_gallery view.
 -- ---------------------------------------------------------------------
