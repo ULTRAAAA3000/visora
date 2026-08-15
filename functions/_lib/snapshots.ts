@@ -314,3 +314,105 @@ ${SHARED_HEAD}
 </body>
 </html>`;
 }
+
+export function refundSnapshot(): string {
+  return `<!doctype html>
+<html lang="en">
+<head>
+${SHARED_HEAD}
+  <title>Refund Policy · Visora</title>
+  <meta name="description" content="14-day money-back guarantee on your first payment for Visora Pro or Agency, no questions asked." />
+  <link rel="canonical" href="https://visor-a.com/refund" />
+</head>
+<body>
+  <main>
+    <h1>Refund Policy</h1>
+    <h2>14-day money-back guarantee</h2>
+    <p>If you're not satisfied with Visora within 14 days of your first payment for Pro or Agency, contact us at <a href="mailto:visora.image@gmail.com">visora.image@gmail.com</a> for a full refund. No questions asked.</p>
+    <h2>Renewals and cancelling</h2>
+    <p>Later monthly renewals aren't covered by the guarantee, but you can cancel any time from your dashboard — it takes effect at the end of your current billing period.</p>
+    <h2>Who processes your refund</h2>
+    <p>Payments are processed by Paddle.com, our merchant of record. See paddle.net for order support.</p>
+    <nav>
+      <a href="/terms">Terms of Service</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/">Home</a>
+    </nav>
+  </main>
+</body>
+</html>`;
+}
+
+export function termsSnapshot(): string {
+  return `<!doctype html>
+<html lang="en">
+<head>
+${SHARED_HEAD}
+  <title>Terms of Service · Visora</title>
+  <meta name="description" content="The terms covering your use of Visora's API, dashboard, and rendering service." />
+  <link rel="canonical" href="https://visor-a.com/terms" />
+</head>
+<body>
+  <main>
+    <h1>Terms of Service</h1>
+    <p>These terms govern your use of Visora — the dashboard, API, and any connected integration — operated out of Ukraine. By creating an account, you agree to them.</p>
+    <h2>Your account</h2>
+    <p>You're responsible for your account credentials and API key. Regenerate it immediately from the dashboard if it leaks.</p>
+    <h2>Acceptable use</h2>
+    <p>No illegal or infringing content, no circumventing quota/rate limits, no reselling raw API access without agreement, no attacking the render infrastructure.</p>
+    <h2>Your content</h2>
+    <p>You own the templates you create and the images they produce.</p>
+    <h2>Plans, billing, and cancellation</h2>
+    <p>Paid plans renew automatically until cancelled, effective at the end of the current billing period. See our Refund Policy for the money-back guarantee. Payments are processed by Paddle.com, our merchant of record.</p>
+    <h2>Uptime and changes</h2>
+    <p>We aim for high availability but don't guarantee it. Features may change with reasonable notice.</p>
+    <h2>Limitation of liability</h2>
+    <p>Visora is provided "as is." Not liable for indirect, incidental, or consequential damages to the extent permitted by law.</p>
+    <h2>Termination</h2>
+    <p>You can delete your account any time. We can suspend accounts for violating acceptable use, non-payment, or if required by law.</p>
+    <h2>Governing law</h2>
+    <p>These terms are governed by the laws of Ukraine.</p>
+    <nav>
+      <a href="/refund">Refund Policy</a>
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/">Home</a>
+    </nav>
+  </main>
+</body>
+</html>`;
+}
+
+export function privacySnapshot(): string {
+  return `<!doctype html>
+<html lang="en">
+<head>
+${SHARED_HEAD}
+  <title>Privacy Policy · Visora</title>
+  <meta name="description" content="What data Visora collects, which third parties process it (Supabase, Cloudflare, our payment provider), and how to exercise your rights." />
+  <link rel="canonical" href="https://visor-a.com/privacy" />
+</head>
+<body>
+  <main>
+    <h1>Privacy Policy</h1>
+    <p>Visora is operated out of Ukraine. For anything in this policy, contact <a href="mailto:visora.image@gmail.com">visora.image@gmail.com</a>.</p>
+    <h2>What we collect</h2>
+    <p>Account data (email, password hashed by Supabase), templates and render data, usage data for quota enforcement, and payment data — handled directly by Paddle, our merchant of record; we never see full card numbers.</p>
+    <h2>Third parties we rely on</h2>
+    <p>Supabase (database and authentication), Cloudflare (hosting, render engine, image storage), Paddle (payment processing, merchant of record).</p>
+    <h2>What we don't do</h2>
+    <p>We don't sell your data, don't use your content to train any AI model, and don't share data with advertisers.</p>
+    <h2>Cookies &amp; analytics</h2>
+    <p>Google Analytics 4 for aggregate traffic measurement only — no Google Signals, no ad personalization, no analytics on the render API itself.</p>
+    <h2>Your rights</h2>
+    <p>Access, export, or request deletion of your account data any time by contacting us. This policy is governed by Ukrainian law.</p>
+    <h2>Children</h2>
+    <p>Visora isn't directed at children under 16.</p>
+    <nav>
+      <a href="/terms">Terms of Service</a>
+      <a href="/refund">Refund Policy</a>
+      <a href="/">Home</a>
+    </nav>
+  </main>
+</body>
+</html>`;
+}

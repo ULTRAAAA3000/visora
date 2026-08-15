@@ -7,6 +7,9 @@ import {
   changelogSnapshot,
   contactSnapshot,
   aboutSnapshot,
+  refundSnapshot,
+  termsSnapshot,
+  privacySnapshot,
 } from './_lib/snapshots';
 
 // Dynamic rendering: Visora's frontend is a client-rendered React SPA, so
@@ -30,6 +33,9 @@ const SNAPSHOTS: Record<string, () => string> = {
   '/changelog': changelogSnapshot,
   '/contact': contactSnapshot,
   '/about': aboutSnapshot,
+  '/refund': refundSnapshot,
+  '/terms': termsSnapshot,
+  '/privacy': privacySnapshot,
 };
 
 export const onRequest: PagesFunction = async (context) => {

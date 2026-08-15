@@ -68,9 +68,13 @@ export default function Terms() {
 
         <Section title="5. Plans, billing, and cancellation">
           <p>
-            Paid plans renew automatically until cancelled. Cancelling stops future renewals; it doesn't
-            retroactively refund the current billing period unless required by law or stated otherwise at
-            checkout.
+            Paid plans renew automatically until cancelled. Cancelling stops future renewals, effective at the
+            end of your current billing period. See our{' '}
+            <a href="/refund" className="text-white underline underline-offset-2">
+              Refund Policy
+            </a>{' '}
+            for the money-back guarantee on your first payment. Payments are processed by Paddle.com, our
+            merchant of record.
           </p>
         </Section>
 

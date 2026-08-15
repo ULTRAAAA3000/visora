@@ -18,6 +18,7 @@ import Guide from './pages/marketing/Guide';
 import About from './pages/marketing/About';
 import Privacy from './pages/marketing/Privacy';
 import Terms from './pages/marketing/Terms';
+import RefundPolicy from './pages/marketing/RefundPolicy';
 import NotFound from './pages/NotFound';
 import TemplatesPublic from './pages/marketing/TemplatesPublic';
 import Changelog from './pages/marketing/Changelog';
@@ -69,6 +70,7 @@ ReactDOM.createRoot(rootElement).render(
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/refund" element={<RefundPolicy />} />
           <Route path="/templates" element={<TemplatesPublic />} />
           <Route path="/changelog" element={<Changelog />} />
           <Route path="/contact" element={<Contact />} />

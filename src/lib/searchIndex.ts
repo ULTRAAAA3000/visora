@@ -109,6 +109,9 @@ export const SEARCH_INDEX: SearchEntry[] = [
   { title: 'Pricing', description: 'Free, Pro, and Agency plans compared.', url: '/#pricing', category: 'Site' },
   { title: 'Changelog', description: "What's shipped, in order.", url: '/changelog', category: 'Site' },
   { title: 'Contact', description: 'Reach us directly — bugs, questions, partnerships.', url: '/contact', category: 'Site' },
+  { title: 'Refund Policy', description: '14-day money-back guarantee, no questions asked.', url: '/refund', category: 'Site' },
+  { title: 'Privacy Policy', description: 'What data Visora collects and how it\'s used.', url: '/privacy', category: 'Site' },
+  { title: 'Terms of Service', description: "The terms covering your use of Visora.", url: '/terms', category: 'Site' },
   { title: 'Dashboard', description: 'Your API key, templates, usage, billing, webhooks.', url: '/dashboard', category: 'Site' },
 ];
 
