@@ -27,6 +27,7 @@ import Contact from './pages/marketing/Contact';
 import DashboardLayout from './pages/dashboard/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
 import Templates from './pages/dashboard/Templates';
+import History from './pages/dashboard/History';
 import TemplateEditor from './pages/dashboard/TemplateEditor';
 import Bulk from './pages/dashboard/Bulk';
 import DashboardGuide from './pages/dashboard/Guide';
@@ -97,6 +98,7 @@ ReactDOM.createRoot(rootElement).render(
           >
             <Route index element={<Overview />} />
             <Route path="templates" element={<Templates />} />
+            <Route path="history" element={<History />} />
             <Route path="templates/:id" element={<TemplateEditor />} />
             <Route path="bulk" element={<Bulk />} />
             <Route path="guide" element={<DashboardGuide />} />

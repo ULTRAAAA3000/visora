@@ -59,6 +59,7 @@ export type RenderLog = {
   render_time_ms: number;
   status_code: number;
   image_url: string | null;
+  data: Record<string, string> | null;
   created_at: string;
 };
 
@@ -198,6 +199,7 @@ export type Database = {
           render_time_ms: number;
           status_code: number;
           image_url?: string | null;
+          data?: Record<string, string> | null;
           created_at?: string;
         };
         Update: {
@@ -207,6 +209,7 @@ export type Database = {
           render_time_ms?: number;
           status_code?: number;
           image_url?: string | null;
+          data?: Record<string, string> | null;
           created_at?: string;
         };
         Relationships: [];

@@ -281,6 +281,7 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
         render_time_ms: renderTimeMs,
         status_code: 200,
         image_url: imageUrl,
+        data,
       }),
       deliverRenderWebhook(profile, 'render.completed', {
         template_id,

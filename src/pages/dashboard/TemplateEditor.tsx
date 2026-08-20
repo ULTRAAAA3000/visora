@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye, Download, Link2, ImagePlus, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/AuthContext';
@@ -164,6 +164,7 @@ interface Tab {
 
 export default function TemplateEditor() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { showToast } = useToast();
@@ -177,6 +178,8 @@ export default function TemplateEditor() {
   const [renderUrl, setRenderUrl] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const rerunId = searchParams.get('rerun');
 
   useEffect(() => {
     if (!id) return;
@@ -202,6 +205,39 @@ export default function TemplateEditor() {
     };
   }, [id]);
 
+  // Quick Re-run (from History): pull the exact field values used for a
+  // past render and fire off a fresh render immediately — the whole
+  // point is not making the user re-enter anything.
+  useEffect(() => {
+    if (!rerunId || !template) return;
+    let isMounted = true;
+
+    supabase
+      .from('render_logs')
+      .select('data')
+      .eq('id', rerunId)
+      .single()
+      .then(({ data, error: fetchError }) => {
+        if (!isMounted || fetchError || !data) return;
+        const values = (data.data as VariableValues | null) ?? {};
+        setVariableValues(values);
+        void renderWithValues(values);
+      });
+
+    // Strip ?rerun= from the URL once consumed so refreshing/re-saving
+    // doesn't keep re-triggering it.
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('rerun');
+      return next;
+    }, { replace: true });
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rerunId, template?.id]);
+
   const variableKeys = useMemo(
     () => (template ? extractVariableKeys(template.html_body) : []),
     [template?.html_body]
@@ -215,6 +251,45 @@ export default function TemplateEditor() {
   const handleFieldChange = (key: string, value: string) => {
     setVariableValues((prev) => ({ ...prev, [key]: value }));
     setRenderUrl(null);
+  };
+
+  const renderWithValues = async (values: VariableValues) => {
+    if (!id) return;
+    const apiBase = import.meta.env.VITE_RENDER_API_URL;
+    if (!apiBase || !profile?.api_key) {
+      setError('Render API is not configured — no preview image was generated.');
+      return;
+    }
+
+    setRendering(true);
+    setError(null);
+    const startedAt = performance.now();
+    const visibility = trackVisibilityDuringRender();
+    try {
+      const res = await fetch(`${apiBase.replace(/\/$/, '')}/api/v1/render`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${profile.api_key}`,
+        },
+        body: JSON.stringify({ template_id: id, format: 'png', data: values }),
+      });
+      const payload = await res.json();
+      if (!res.ok || !payload.success) {
+        throw new Error(payload.error || 'Render failed.');
+      }
+      setRenderUrl(payload.data.url as string);
+
+      const durationMs = performance.now() - startedAt;
+      if (shouldNotifyRenderComplete(durationMs, visibility)) {
+        showToast('Image ready!', 'render-ready', { sound: true });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Render failed.');
+    } finally {
+      visibility.stop();
+      setRendering(false);
+    }
   };
 
   const handleSave = async () => {
@@ -244,42 +319,8 @@ export default function TemplateEditor() {
     // Saving the template row doesn't produce an image on its own — render
     // one now with the current field values so there's something to
     // download/share immediately after hitting Save.
-    const apiBase = import.meta.env.VITE_RENDER_API_URL;
-    if (!apiBase || !profile?.api_key) {
-      setSaving(false);
-      setError('Render API is not configured — template saved, but no preview image was generated.');
-      return;
-    }
-
-    setRendering(true);
-    const startedAt = performance.now();
-    const visibility = trackVisibilityDuringRender();
-    try {
-      const res = await fetch(`${apiBase.replace(/\/$/, '')}/api/v1/render`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${profile.api_key}`,
-        },
-        body: JSON.stringify({ template_id: id, format: 'png', data: variableValues }),
-      });
-      const payload = await res.json();
-      if (!res.ok || !payload.success) {
-        throw new Error(payload.error || 'Render failed.');
-      }
-      setRenderUrl(payload.data.url as string);
-
-      const durationMs = performance.now() - startedAt;
-      if (shouldNotifyRenderComplete(durationMs, visibility)) {
-        showToast('Image ready!', 'render-ready', { sound: true });
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Render failed.');
-    } finally {
-      visibility.stop();
-      setRendering(false);
-      setSaving(false);
-    }
+    await renderWithValues(variableValues);
+    setSaving(false);
   };
 
   const downloadBlobUrl = (blobUrl: string) => {
