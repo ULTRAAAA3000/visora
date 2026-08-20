@@ -315,6 +315,10 @@ export type Database = {
       };
     };
     Functions: {
+      is_admin: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       admin_get_auth_audit_log: {
         Args: { result_limit?: number };
         Returns: {
