@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 import { AuthProvider } from './lib/AuthContext';
+import { ToastProvider } from './components/ToastProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import { initAnalytics, trackPageview } from './lib/analytics';
 import { trackPageviewSelf } from './lib/selfAnalytics';
@@ -59,6 +60,7 @@ ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
+        <ToastProvider>
         <RouteTracker />
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -118,6 +120,7 @@ ReactDOM.createRoot(rootElement).render(
 
           <Route path="*" element={<NotFound />} />
         </Routes>
+      </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>

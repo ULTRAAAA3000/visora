@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye, Download, Link2, ImagePlus, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/AuthContext';
+import { useToast } from '../../components/ToastProvider';
+import { trackVisibilityDuringRender, shouldNotifyRenderComplete } from '../../lib/renderNotify';
 import type { Template } from '../../lib/database.types';
 import { fillTemplate, extractVariableKeys, humanizeKey, type VariableValues } from '../../lib/template';
 
@@ -164,6 +166,7 @@ export default function TemplateEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { showToast } = useToast();
 
   const [template, setTemplate] = useState<Template | null>(null);
   const [variableValues, setVariableValues] = useState<VariableValues>({});
@@ -249,6 +252,8 @@ export default function TemplateEditor() {
     }
 
     setRendering(true);
+    const startedAt = performance.now();
+    const visibility = trackVisibilityDuringRender();
     try {
       const res = await fetch(`${apiBase.replace(/\/$/, '')}/api/v1/render`, {
         method: 'POST',
@@ -263,9 +268,15 @@ export default function TemplateEditor() {
         throw new Error(payload.error || 'Render failed.');
       }
       setRenderUrl(payload.data.url as string);
+
+      const durationMs = performance.now() - startedAt;
+      if (shouldNotifyRenderComplete(durationMs, visibility)) {
+        showToast('Image ready!', 'render-ready', { sound: true });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Render failed.');
     } finally {
+      visibility.stop();
       setRendering(false);
       setSaving(false);
     }

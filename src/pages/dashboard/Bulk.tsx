@@ -14,6 +14,8 @@ import {
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { extractVariableKeys, humanizeKey } from '../../lib/template';
+import { useToast } from '../../components/ToastProvider';
+import { trackVisibilityDuringRender, shouldNotifyRenderComplete } from '../../lib/renderNotify';
 import type { Template } from '../../lib/database.types';
 
 type RowStatus = 'pending' | 'rendering' | 'done' | 'error';
@@ -59,6 +61,7 @@ function rowLabel(row: BulkRow, mapping: Record<string, string>, variableKeys: s
 
 export default function Bulk() {
   const { profile } = useAuth();
+  const { showToast } = useToast();
 
   const [templates, setTemplates] = useState<Template[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
@@ -181,6 +184,9 @@ export default function Bulk() {
     setRunning(true);
     cancelRef.current = false;
 
+    const startedAt = performance.now();
+    const visibility = trackVisibilityDuringRender();
+
     const queue = [...initialRows];
     const results = [...initialRows];
 
@@ -223,6 +229,19 @@ export default function Bulk() {
 
     await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
     setRunning(false);
+
+    visibility.stop();
+    if (!cancelRef.current) {
+      const durationMs = performance.now() - startedAt;
+      const doneCount = results.filter((r) => r.status === 'done').length;
+      if (doneCount > 0 && shouldNotifyRenderComplete(durationMs, visibility)) {
+        showToast(
+          doneCount === 1 ? 'Image ready!' : `${doneCount} images ready!`,
+          'render-ready',
+          { sound: true }
+        );
+      }
+    }
   };
 
   const handleCancel = () => {
