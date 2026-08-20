@@ -55,17 +55,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (isMounted) {
-        setSession(data.session);
-        setLoading(false);
-      }
-    });
-
+    // Deliberately NOT also calling supabase.auth.getSession() here.
+    // onAuthStateChange's first invocation (event INITIAL_SESSION)
+    // already waits for supabase-js's internal init — including
+    // exchanging a pending OAuth `?code=` param for a session after
+    // the Google redirect. Calling getSession() separately raced that
+    // exchange: it could resolve with session=null a moment before the
+    // real session landed, which set loading=false early and bounced
+    // freshly-authenticated Google users straight back to /login.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (!isMounted) return;
       setSession(newSession);
+      setLoading(false);
     });
 
     return () => {
