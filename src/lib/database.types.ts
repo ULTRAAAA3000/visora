@@ -322,6 +322,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
+      email_exists: {
+        Args: { check_email: string };
+        Returns: boolean;
+      };
       admin_get_auth_audit_log: {
         Args: { result_limit?: number };
         Returns: {

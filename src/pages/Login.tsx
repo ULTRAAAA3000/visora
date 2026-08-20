@@ -45,7 +45,16 @@ export default function Login() {
     setCaptchaToken(null);
 
     if (signInError) {
-      setError(signInError.message);
+      // Supabase deliberately returns a generic "Invalid login
+      // credentials" for both cases (avoids leaking which one on its
+      // own). Disambiguate with a dedicated existence check — see the
+      // security-tradeoff note in migration 0029.
+      if (signInError.message.toLowerCase().includes('invalid login credentials')) {
+        const { data: exists } = await supabase.rpc('email_exists', { check_email: email });
+        setError(exists ? 'Incorrect password. Try again or reset it below.' : 'No account found with that email.');
+      } else {
+        setError(signInError.message);
+      }
       return;
     }
     navigate(redirectTo, { replace: true });
