@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { usePageMeta } from '../lib/usePageMeta';
 import Turnstile, { type TurnstileHandle } from '../components/Turnstile';
+import GoogleAuthButton from '../components/GoogleAuthButton';
 
 export default function Signup() {
   usePageMeta({
@@ -87,6 +88,14 @@ export default function Signup() {
 
         <div className="rounded-2xl p-8 bg-white/[0.03] border border-white/10">
           <h1 className="text-xl font-medium mb-6">Create your account</h1>
+
+          <GoogleAuthButton redirectPath="/dashboard" />
+
+          <div className="flex items-center gap-3 my-5">
+            <div className="h-px bg-white/10 flex-1" />
+            <span className="text-xs text-gray-500">or</span>
+            <div className="h-px bg-white/10 flex-1" />
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
