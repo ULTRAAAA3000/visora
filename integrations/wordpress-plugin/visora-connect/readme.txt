@@ -4,7 +4,7 @@ Tags: og image, social image, image generation, banner, certificate
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,7 +53,20 @@ Yes — call `visora_get_option('visora_api_key')` and
 `visora_get_option('visora_api_url')` from your own PHP and hit
 `{api_url}/api/v1/render` directly, same as the shortcode does.
 
+== External services ==
+
+This plugin connects to the Visora API (api.visor-a.com) to render images from HTML/Tailwind templates. It is a required part of the plugin's functionality — without it, no images can be rendered.
+
+**Connect flow (Settings > Visora):** when you click "Connect to Visora", your browser is redirected to visor-a.com to log in or sign up. On approval, your site receives an API key which is stored locally as a WordPress option. No content from your site is sent during this step.
+
+**Rendering (`[visora_render]` shortcode):** each time the shortcode is used and no cached result exists, your site's server sends a request to `https://api.visor-a.com/api/v1/render` containing: your API key (for authentication), the template ID, and the shortcode's attributes (the template data you explicitly provide, e.g. title/price/text passed in the shortcode). This request is server-side only; the API key is never exposed to site visitors. Successful responses (an image URL) are cached in a WordPress transient for 24 hours to avoid repeat calls.
+
+Visora: https://visor-a.com — [Terms of Service](https://visor-a.com/terms) — [Privacy Policy](https://visor-a.com/privacy)
+
 == Changelog ==
+
+= 1.0.1 =
+* Documented external service usage (Visora API) per WordPress.org guidelines.
 
 = 1.0.0 =
 * Initial release: one-click connect flow + `[visora_render]` shortcode.
