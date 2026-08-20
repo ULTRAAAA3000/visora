@@ -177,7 +177,7 @@ async function handleWhoami(request: Request, env: Env): Promise<Response> {
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id, email, plan_tier, monthly_quota, usage_this_month')
+    .select('id, email, plan_tier, monthly_quota, usage_this_month, credit_balance')
     .eq('api_key', token)
     .single();
 
@@ -192,6 +192,7 @@ async function handleWhoami(request: Request, env: Env): Promise<Response> {
       plan_tier: profile.plan_tier,
       monthly_quota: profile.monthly_quota,
       usage_this_month: profile.usage_this_month,
+      credit_balance: profile.credit_balance,
     },
   });
 }
@@ -208,7 +209,7 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
 
   const auth = await authenticate(request, supabase);
   if (auth.error) return auth.error;
-  const { profile } = auth;
+  const { profile, usedCredit } = auth;
 
   let body: RenderRequestBody;
   try {
@@ -271,10 +272,26 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
   // isolate once the response is returned unless kept alive explicitly.
   ctx.waitUntil(
     Promise.all([
-      supabase
-        .from('profiles')
-        .update({ usage_this_month: profile.usage_this_month + 1 })
-        .eq('id', profile.id),
+      usedCredit
+        ? supabase
+            .rpc('consume_render_credit', { p_user_id: profile.id })
+            .then(({ data: consumed, error: consumeError }) => {
+              if (consumeError) {
+                console.error('consume_render_credit failed', consumeError);
+              } else if (!consumed) {
+                // Lost a race against another concurrent request for the
+                // last credit — authenticate()'s check-then-render window
+                // isn't atomic (same as the pre-existing quota check
+                // below). The render already happened and shipped; there's
+                // nothing to roll back, so just log it as a rare
+                // gave-away-a-free-render event rather than silently.
+                console.error(`consume_render_credit: no credits left for user ${profile.id}, but render was already delivered.`);
+              }
+            })
+        : supabase
+            .from('profiles')
+            .update({ usage_this_month: profile.usage_this_month + 1 })
+            .eq('id', profile.id),
       supabase.from('render_logs').insert({
         user_id: profile.id,
         template_id,
@@ -298,6 +315,7 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
     success: true,
     render_time: `${renderTimeMs}ms`,
     cached: Boolean(cached),
+    billed_to: usedCredit ? 'credits' : 'quota',
     data: {
       url: imageUrl,
       width: template.width ?? 1200,
