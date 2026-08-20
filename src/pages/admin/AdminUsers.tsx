@@ -4,10 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/AuthContext';
 import type { Profile } from '../../lib/database.types';
 
-type Row = Pick<
-  Profile,
-  'id' | 'email' | 'plan_tier' | 'monthly_quota' | 'usage_this_month' | 'is_admin' | 'subscription_status' | 'created_at'
->;
+type Row = Pick<Profile, 'id' | 'email' | 'plan_tier' | 'monthly_quota' | 'usage_this_month' | 'is_admin' | 'created_at'>;
 
 const PLAN_TIERS: Profile['plan_tier'][] = ['free', 'starter', 'pro', 'agency'];
 
@@ -15,6 +12,7 @@ export default function AdminUsers() {
   const { profile: currentAdmin } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -24,11 +22,22 @@ export default function AdminUsers() {
 
   async function load() {
     setLoading(true);
+    setLoadError(null);
+    // NOTE: deliberately not selecting subscription_status here — that
+    // column ships with the Paddle billing migration (0015), which is
+    // being held back while billing is reworked. Selecting a column
+    // that doesn't exist yet fails the whole query (empty table, no
+    // visible error) rather than just that one field.
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, plan_tier, monthly_quota, usage_this_month, is_admin, subscription_status, created_at')
+      .select('id, email, plan_tier, monthly_quota, usage_this_month, is_admin, created_at')
       .order('created_at', { ascending: false });
-    if (!error && data) setRows(data);
+    if (error) {
+      console.error('Failed to load users', error);
+      setLoadError(error.message);
+    } else if (data) {
+      setRows(data);
+    }
     setLoading(false);
   }
 
@@ -78,6 +87,10 @@ export default function AdminUsers() {
         />
       </div>
 
+      {loadError && (
+        <p className="text-sm text-red-400 mb-4">Couldn't load users: {loadError}</p>
+      )}
+
       {loading ? (
         <p className="text-gray-400 text-sm">Loading…</p>
       ) : (
@@ -88,7 +101,7 @@ export default function AdminUsers() {
                 <th className="px-4 py-3 font-medium">Email</th>
                 <th className="px-4 py-3 font-medium">Plan</th>
                 <th className="px-4 py-3 font-medium">Usage</th>
-                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Plan status</th>
                 <th className="px-4 py-3 font-medium">Admin</th>
                 <th className="px-4 py-3 font-medium">Joined</th>
                 <th className="px-4 py-3 font-medium"></th>
@@ -115,7 +128,9 @@ export default function AdminUsers() {
                   <td className="px-4 py-3 text-gray-400 whitespace-nowrap">
                     {r.usage_this_month} / {r.monthly_quota}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">{r.subscription_status ?? '—'}</td>
+                  <td className="px-4 py-3 text-gray-500 text-xs">
+                    {r.plan_tier === 'free' ? 'Free' : 'Paid'}
+                  </td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => toggleAdmin(r.id, !r.is_admin)}
