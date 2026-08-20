@@ -25,11 +25,31 @@ binding = "MYBROWSER"
 binding = "RENDERS"
 bucket_name = "visora-renders"
 
+# Monobank reconciliation cron (Rail B) — polls the statement every 5
+# minutes looking for VISORA-{n} references in incoming transfers.
+# Monobank itself rate-limits statement calls to 1/60s, so don't go
+# tighter than this without also batching/backing off in bank-payments.ts.
+[triggers]
+crons = ["*/5 * * * *"]
+
 # Secrets — do NOT put these here. Set them with:
 #   npx wrangler secret put SUPABASE_URL
 #   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 #   npx wrangler secret put PADDLE_WEBHOOK_SECRET
-#   npx wrangler secret put RESEND_API_KEY   (optional)
+#   npx wrangler secret put RESEND_API_KEY        (optional)
+#   npx wrangler secret put TELEGRAM_BOT_TOKEN     (optional)
+#   npx wrangler secret put TELEGRAM_ADMIN_CHAT_ID (optional)
+#   npx wrangler secret put USDT_TRC20_WALLET
+#   npx wrangler secret put USDT_BEP20_WALLET
+#   npx wrangler secret put TRONSCAN_API_KEY      (optional)
+#   npx wrangler secret put BSCSCAN_API_KEY
+#   npx wrangler secret put MONO_API_TOKEN
+#   npx wrangler secret put MONO_ACCOUNT_ID
+#   npx wrangler secret put MONO_BENEFICIARY_NAME
+#   npx wrangler secret put MONO_IBAN
+#   npx wrangler secret put MONO_SWIFT_CODE
+#   npx wrangler secret put MONO_BANK_ADDRESS
+#   npx wrangler secret put MONO_TAX_ID
 #
 # PADDLE_WEBHOOK_SECRET is the "Secret key" Paddle generates when you
 # create the notification destination: Paddle Dashboard -> Developer
@@ -41,8 +61,17 @@ bucket_name = "visora-renders"
 # again in Live/production — Paddle keeps the two fully separate, with
 # separate secrets, price IDs, and API keys.)
 #
-# RESEND_API_KEY is optional — the contact form works without it
-# (messages still land in Supabase, visible in /admin/messages). Set it
-# once visor-a.com is verified as a sending domain in Resend to also
-# email visora.image@gmail.com for every submission. The `from` address
-# in worker/src/lib/contact.ts already points at contact@visor-a.com.
+# RESEND_API_KEY is optional — the contact form and payment receipt
+# emails work without it (payment state still lands in Supabase). Set
+# it once visor-a.com is verified as a sending domain in Resend.
+#
+# USDT_TRC20_WALLET / USDT_BEP20_WALLET are the receiving wallets from
+# the spec (TDGGsmQ4aKs7hUxTRApYBtkyShq3yPkBqK / 0x6A0E7C9D...fE7E2).
+# BSCSCAN_API_KEY: free tier at https://bscscan.com/myapikey — required,
+# the tokentx endpoint rejects unauthenticated requests. TRONSCAN_API_KEY
+# is optional (raises TronScan's anonymous rate limit); get one at
+# https://tronscan.org/#/myaccount/apiKeys if verification starts 429ing.
+#
+# MONO_ACCOUNT_ID is the account id from Monobank's personal/client-info
+# response (not the IBAN) — call that endpoint once with MONO_API_TOKEN
+# to find the right account among your jars/currencies.

@@ -60,3 +60,34 @@ export async function authenticate(request: Request, supabase: SupabaseClient): 
 
   return { profile };
 }
+
+/**
+ * Same API-key lookup as `authenticate`, but without the quota check —
+ * for endpoints that aren't renders (payments, whoami-style checks).
+ * A user hitting their render quota is exactly who's trying to buy
+ * more, so blocking them here would be self-defeating.
+ */
+export async function authenticateBasic(
+  request: Request,
+  supabase: SupabaseClient
+): Promise<{ profile: { id: string; email: string }; error?: undefined } | { profile?: undefined; error: Response }> {
+  const authHeader = request.headers.get('Authorization') || '';
+  const [scheme, token] = authHeader.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    return {
+      error: json(
+        { success: false, error: 'Missing or malformed Authorization header. Expected: Bearer <api_key>' },
+        401
+      ),
+    };
+  }
+
+  const { data: profile, error } = await supabase.from('profiles').select('id, email').eq('api_key', token).single();
+
+  if (error || !profile) {
+    return { error: json({ success: false, error: 'Invalid API key.' }, 401) };
+  }
+
+  return { profile };
+}

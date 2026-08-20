@@ -1,9 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
 import { authenticate, json } from './lib/auth';
+import { handleCreateBankInvoice, runMonobankReconciliation } from './lib/bank-payments';
 import { handlePaddleWebhook } from './lib/billing';
 import { computeCacheKey } from './lib/cache';
 import { handleContact } from './lib/contact';
+import { handleListCreditPackages, handleVerifyCryptoPayment } from './lib/crypto-payments';
 import { fillTemplate, renderHtmlToImage, type TemplateVariables } from './lib/render';
 import { handleTrack } from './lib/track';
 import { deliverRenderWebhook } from './lib/webhook';
@@ -35,6 +37,14 @@ export default {
 
     const response = await route(request, env, ctx);
     return withCors(response);
+  },
+
+  // Monobank reconciliation cron — see wrangler.toml's [triggers] and
+  // bank-payments.ts for the actual polling/matching logic. Wrapped in
+  // waitUntil so the invocation isn't torn down mid-flight.
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+    ctx.waitUntil(runMonobankReconciliation(env, supabase));
   },
 } satisfies ExportedHandler<Env>;
 
@@ -90,6 +100,23 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
     if (request.method === 'POST' && url.pathname === '/webhooks/paddle') {
       const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
       return handlePaddleWebhook(request, env.PADDLE_WEBHOOK_SECRET, supabase);
+    }
+
+    // Hybrid payment infrastructure (credits, alongside Paddle
+    // subscriptions) — see lib/crypto-payments.ts and lib/bank-payments.ts.
+    if (request.method === 'GET' && url.pathname === '/api/v1/payments/packages') {
+      const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+      return handleListCreditPackages(supabase);
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/v1/payments/crypto/verify') {
+      const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+      return handleVerifyCryptoPayment(request, env, supabase);
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/v1/payments/bank/request') {
+      const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+      return handleCreateBankInvoice(request, env, supabase);
     }
 
     return new Response('Not found', { status: 404 });
