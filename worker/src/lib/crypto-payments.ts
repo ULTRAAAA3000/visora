@@ -86,12 +86,13 @@ export async function handleVerifyCryptoPayment(request: Request, env: Env, supa
     return json({ success: false, error: 'This transaction has already been redeemed.' }, 409);
   }
 
-  const { error: creditError } = await supabase.rpc('increment_user_credits', {
+  const { data: newBalance, error: creditError } = await supabase.rpc('add_credit_addon', {
     p_user_id: profile.id,
-    p_credit_amount: pkg.credits,
+    p_credits: pkg.credits,
+    p_reference: tx_hash,
   });
   if (creditError) {
-    console.error('increment_user_credits failed', creditError);
+    console.error('add_credit_addon failed', creditError);
     return json({ success: false, error: 'Payment verified but crediting failed — contact support and reference your tx hash.' }, 500);
   }
 
@@ -108,7 +109,7 @@ export async function handleVerifyCryptoPayment(request: Request, env: Env, supa
     ),
   ]);
 
-  return json({ success: true, data: { credits_added: pkg.credits } });
+  return json({ success: true, data: { credits_added: pkg.credits, new_balance: newBalance } });
 }
 
 /**

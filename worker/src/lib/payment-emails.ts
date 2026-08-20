@@ -156,3 +156,43 @@ Reference: ${reference}`;
 function escapeHtml(str: string): string {
   return str.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 }
+
+/**
+ * Sent when a prepaid subscription plan (Growth/Scale) is activated or
+ * renewed — via manual bank confirmation, the admin panel/bot, or a
+ * crypto acquirer webhook (see index.ts's handleActivateSubscription /
+ * handleCryptoWebhook). Distinct from sendCreditConfirmationEmail,
+ * which is for one-time add-on top-ups that don't change the plan or
+ * push credits_reset_at out.
+ */
+export async function sendSubscriptionActivatedEmail(
+  env: Env,
+  params: { toEmail: string; toName?: string; plan: string; credits: number; expiresAt: string | null }
+): Promise<void> {
+  const { toEmail, toName, plan, credits, expiresAt } = params;
+  const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
+  const expiresLabel = expiresAt ? new Date(expiresAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'never (Free plan)';
+
+  const html = shell(`
+    <p style="margin:0 0 16px 0;">Hi ${escapeHtml(toName ?? '')},</p>
+    <p style="margin:0 0 20px 0;">Your <strong style="color:#ffffff;">${escapeHtml(planLabel)}</strong> plan is active — <strong style="color:#ffffff;">${credits.toLocaleString('en-US')} credits</strong> are ready to use.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border:1px solid #262626;border-radius:8px;padding:16px 18px;margin-bottom:20px;">
+      ${row('Plan', planLabel)}
+      ${row('Credits', credits.toLocaleString('en-US'))}
+      ${row('Renew by', expiresLabel)}
+    </table>
+    <p style="margin:0;color:#a3a3a3;font-size:12.5px;">There's no auto-renewal — this is a prepaid 30-day period. Renew any time before it ends (bank transfer or crypto) to keep your plan active without a gap.</p>
+  `);
+
+  const text = `Hi ${toName ?? ''},
+
+Your ${planLabel} plan is active — ${credits} credits are ready to use.
+
+Plan: ${planLabel}
+Credits: ${credits}
+Renew by: ${expiresLabel}
+
+There's no auto-renewal — this is a prepaid 30-day period. Renew any time before it ends to keep your plan active without a gap.`;
+
+  await sendEmail(env, toEmail, `Your ${planLabel} plan is active`, html, text);
+}

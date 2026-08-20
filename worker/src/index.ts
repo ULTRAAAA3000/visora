@@ -1,12 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
-import { authenticate, json } from './lib/auth';
+import { authenticate, json, RENDER_COST } from './lib/auth';
 import { handleCreateBankInvoice, runMonobankReconciliation } from './lib/bank-payments';
 import { handlePaddleWebhook } from './lib/billing';
 import { computeCacheKey } from './lib/cache';
 import { handleContact } from './lib/contact';
 import { handleGetPaymentConfig, handleListCreditPackages, handleVerifyCryptoPayment } from './lib/crypto-payments';
 import { fillTemplate, renderHtmlToImage, type TemplateVariables } from './lib/render';
+import { handleActivateSubscription, handleCryptoSubscriptionWebhook } from './lib/subscriptions';
 import { handleTrack } from './lib/track';
 import { deliverRenderWebhook } from './lib/webhook';
 import type { Env } from './env';
@@ -135,6 +136,19 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
       return handleCreateBankInvoice(request, env, supabase);
     }
 
+    // Prepaid subscription plans (migration 0027) — manual renewal only,
+    // no card auto-billing. Both backend-to-backend, guarded by a shared
+    // secret rather than a user API key (see lib/auth.ts's authenticateService).
+    if (request.method === 'POST' && url.pathname === '/api/admin/subscriptions/activate') {
+      const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+      return handleActivateSubscription(request, env, supabase);
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/webhooks/crypto') {
+      const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+      return handleCryptoSubscriptionWebhook(request, env, supabase);
+    }
+
     return new Response('Not found', { status: 404 });
 }
 
@@ -181,7 +195,7 @@ async function handleWhoami(request: Request, env: Env): Promise<Response> {
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id, email, plan_tier, monthly_quota, usage_this_month, credit_balance')
+    .select('id, email, credits, subscription_plan, subscription_status, credits_reset_at')
     .eq('api_key', token)
     .single();
 
@@ -193,10 +207,10 @@ async function handleWhoami(request: Request, env: Env): Promise<Response> {
     success: true,
     data: {
       email: profile.email,
-      plan_tier: profile.plan_tier,
-      monthly_quota: profile.monthly_quota,
-      usage_this_month: profile.usage_this_month,
-      credit_balance: profile.credit_balance,
+      credits: profile.credits,
+      subscription_plan: profile.subscription_plan,
+      subscription_status: profile.subscription_status,
+      credits_reset_at: profile.credits_reset_at,
     },
   });
 }
@@ -213,7 +227,7 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
 
   const auth = await authenticate(request, supabase);
   if (auth.error) return auth.error;
-  const { profile, usedCredit } = auth;
+  const { profile } = auth;
 
   let body: RenderRequestBody;
   try {
@@ -276,26 +290,20 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
   // isolate once the response is returned unless kept alive explicitly.
   ctx.waitUntil(
     Promise.all([
-      usedCredit
-        ? supabase
-            .rpc('consume_render_credit', { p_user_id: profile.id })
-            .then(({ data: consumed, error: consumeError }) => {
-              if (consumeError) {
-                console.error('consume_render_credit failed', consumeError);
-              } else if (!consumed) {
-                // Lost a race against another concurrent request for the
-                // last credit — authenticate()'s check-then-render window
-                // isn't atomic (same as the pre-existing quota check
-                // below). The render already happened and shipped; there's
-                // nothing to roll back, so just log it as a rare
-                // gave-away-a-free-render event rather than silently.
-                console.error(`consume_render_credit: no credits left for user ${profile.id}, but render was already delivered.`);
-              }
-            })
-        : supabase
-            .from('profiles')
-            .update({ usage_this_month: profile.usage_this_month + 1 })
-            .eq('id', profile.id),
+      supabase
+        .rpc('consume_credits', { p_user_id: profile.id, p_amount: RENDER_COST, p_reference: template_id })
+        .then(({ data: consumed, error: consumeError }) => {
+          if (consumeError) {
+            console.error('consume_credits failed', consumeError);
+          } else if (!consumed) {
+            // Lost a race against another concurrent request for the
+            // last credit(s) — authenticate()'s check-then-render
+            // window isn't atomic. The render already happened and
+            // shipped; there's nothing to roll back, so just log it as
+            // a rare gave-away-a-free-render event rather than silently.
+            console.error(`consume_credits: not enough credits for user ${profile.id}, but render was already delivered.`);
+          }
+        }),
       supabase.from('render_logs').insert({
         user_id: profile.id,
         template_id,
@@ -319,7 +327,7 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
     success: true,
     render_time: `${renderTimeMs}ms`,
     cached: Boolean(cached),
-    billed_to: usedCredit ? 'credits' : 'quota',
+    credits_spent: RENDER_COST,
     data: {
       url: imageUrl,
       width: template.width ?? 1200,
@@ -399,7 +407,7 @@ async function handlePreview(templateId: string, env: Env): Promise<Response> {
  * Lets a Pro/Agency user fire a fake `webhook.test` event at their own
  * configured endpoint from the dashboard, so they can verify signature
  * verification and their handler's plumbing without needing to spend a
- * real render on it. Doesn't touch monthly_quota — this isn't a render.
+ * real render on it. Doesn't touch `credits` — this isn't a render.
  */
 async function handleTestWebhook(request: Request, env: Env): Promise<Response> {
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
@@ -412,7 +420,7 @@ async function handleTestWebhook(request: Request, env: Env): Promise<Response> 
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('plan_tier, webhook_url, webhook_secret')
+    .select('subscription_plan, webhook_url, webhook_secret')
     .eq('api_key', token)
     .single();
 
@@ -420,8 +428,8 @@ async function handleTestWebhook(request: Request, env: Env): Promise<Response> 
     return json({ success: false, error: 'Invalid API key.' }, 401);
   }
 
-  if (profile.plan_tier !== 'pro' && profile.plan_tier !== 'agency') {
-    return json({ success: false, error: 'Webhooks are a Pro/Agency feature.' }, 403);
+  if (profile.subscription_plan !== 'growth' && profile.subscription_plan !== 'scale') {
+    return json({ success: false, error: 'Webhooks are a Growth/Scale plan feature.' }, 403);
   }
 
   if (!profile.webhook_url) {

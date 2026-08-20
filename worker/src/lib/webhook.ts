@@ -14,10 +14,10 @@
  * allowlisting.
  */
 
-const PLANS_WITH_WEBHOOKS = new Set(['pro', 'agency']);
+const PLANS_WITH_WEBHOOKS = new Set(['growth', 'scale']);
 
 interface WebhookRecipient {
-  plan_tier: string;
+  subscription_plan: string;
   webhook_url: string | null;
   webhook_secret: string | null;
 }
@@ -39,7 +39,7 @@ export async function deliverRenderWebhook(
   event: 'render.completed' | 'webhook.test',
   data: Record<string, unknown>
 ): Promise<void> {
-  if (!PLANS_WITH_WEBHOOKS.has(profile.plan_tier)) return;
+  if (!PLANS_WITH_WEBHOOKS.has(profile.subscription_plan)) return;
   if (!profile.webhook_url || !profile.webhook_secret) return;
 
   const body = JSON.stringify({ event, data, timestamp: new Date().toISOString() });

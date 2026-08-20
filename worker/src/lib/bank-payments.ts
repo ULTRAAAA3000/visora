@@ -192,12 +192,13 @@ export async function runMonobankReconciliation(env: Env, supabase: SupabaseClie
     }
     if (!updated || updated.length === 0) continue; // already handled by a concurrent/overlapping run
 
-    const { error: creditError } = await supabase.rpc('increment_user_credits', {
+    const { error: creditError } = await supabase.rpc('add_credit_addon', {
       p_user_id: invoice.user_id,
-      p_credit_amount: invoice.credit_amount,
+      p_credits: invoice.credit_amount,
+      p_reference: invoice.reference_code,
     });
     if (creditError) {
-      console.error('increment_user_credits failed for invoice', invoice.reference_code, creditError);
+      console.error('add_credit_addon failed for invoice', invoice.reference_code, creditError);
     }
 
     await Promise.all([

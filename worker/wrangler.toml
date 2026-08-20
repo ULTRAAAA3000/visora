@@ -50,6 +50,8 @@ crons = ["*/5 * * * *"]
 #   npx wrangler secret put MONO_SWIFT_CODE
 #   npx wrangler secret put MONO_BANK_ADDRESS
 #   npx wrangler secret put MONO_TAX_ID
+#   npx wrangler secret put ADMIN_API_SECRET
+#   npx wrangler secret put CRYPTO_WEBHOOK_SECRET
 #
 # PADDLE_WEBHOOK_SECRET is the "Secret key" Paddle generates when you
 # create the notification destination: Paddle Dashboard -> Developer
@@ -75,3 +77,15 @@ crons = ["*/5 * * * *"]
 # MONO_ACCOUNT_ID is the account id from Monobank's personal/client-info
 # response (not the IBAN) — call that endpoint once with MONO_API_TOKEN
 # to find the right account among your jars/currencies.
+#
+# ADMIN_API_SECRET guards POST /api/admin/subscriptions/activate — the
+# manual-renewal grant endpoint for the admin panel / Telegram bot /
+# whoever confirms a bank transfer landed. Generate any long random
+# string; whatever calls this endpoint sends it as
+# `Authorization: Bearer <ADMIN_API_SECRET>`.
+#
+# CRYPTO_WEBHOOK_SECRET guards POST /api/webhooks/crypto the same way —
+# a payment-confirmation postback for on-site crypto acquiring of a
+# subscription plan. Placeholder until a specific acquirer is wired in;
+# the payload shape in lib/subscriptions.ts may need adjusting to match
+# whatever's actually integrated.

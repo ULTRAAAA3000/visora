@@ -32,4 +32,9 @@ export interface Env {
   MONO_SWIFT_CODE: string;
   MONO_BANK_ADDRESS: string;
   MONO_TAX_ID: string;
+
+  // Prepaid subscription plans (migration 0027) — backend-to-backend
+  // endpoints, not user-facing. See lib/auth.ts's authenticateService.
+  ADMIN_API_SECRET: string; // POST /api/admin/subscriptions/activate — admin panel / Telegram bot / manual-confirmation email flow
+  CRYPTO_WEBHOOK_SECRET: string; // POST /api/webhooks/crypto — a future/external crypto acquirer's payment-confirmation postback
 }
