@@ -189,7 +189,7 @@ export default function BuyCreditsModal({ open, onClose }: { open: boolean; onCl
                 {step === 'package' && (
                   <div className="space-y-2">
                     <p className="text-xs text-white/40 mb-3">
-                      Current balance: <span className="text-white">{profile.credit_balance.toLocaleString('en-US')} credits</span>. Credits are
+                      Current balance: <span className="text-white">{(profile.credit_balance ?? 0).toLocaleString('en-US')} credits</span>. Credits are
                       spent automatically once your monthly quota runs out.
                     </p>
                     {packagesLoading && (

@@ -221,7 +221,7 @@ export default function Overview() {
           <div className="flex items-center gap-2">
             <Coins className="w-3.5 h-3.5 text-amber-300/70" />
             <div>
-              <p className="text-sm text-white">{profile.credit_balance.toLocaleString('en-US')} credits</p>
+              <p className="text-sm text-white">{(profile.credit_balance ?? 0).toLocaleString('en-US')} credits</p>
               <p className="text-[11px] text-gray-500">Used automatically once monthly renders run out</p>
             </div>
           </div>
