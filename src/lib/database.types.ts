@@ -26,6 +26,7 @@ export type Profile = {
   plan_tier: 'free' | 'starter' | 'pro' | 'agency';
   monthly_quota: number;
   usage_this_month: number;
+  credit_balance: number;
   onboarding_completed_at: string | null;
   paddle_customer_id: string | null;
   paddle_subscription_id: string | null;
@@ -117,6 +118,14 @@ export type SecuritySettingsRow = {
   updated_at: string;
 };
 
+export type CreditPackage = {
+  id: string;
+  name: string;
+  credits: number;
+  price_usd: number;
+  is_active: boolean;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -129,6 +138,7 @@ export type Database = {
           plan_tier?: Profile['plan_tier'];
           monthly_quota?: number;
           usage_this_month?: number;
+          credit_balance?: number;
           onboarding_completed_at?: string | null;
           paddle_customer_id?: string | null;
           paddle_subscription_id?: string | null;
@@ -146,6 +156,7 @@ export type Database = {
           plan_tier?: Profile['plan_tier'];
           monthly_quota?: number;
           usage_this_month?: number;
+          credit_balance?: number;
           onboarding_completed_at?: string | null;
           paddle_customer_id?: string | null;
           paddle_subscription_id?: string | null;
@@ -307,6 +318,26 @@ export type Database = {
           max_login_failures_per_account?: number;
           login_lockout_window_minutes?: number;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      credit_packages: {
+        Row: CreditPackage;
+        // Written only via the migration seed / manually in Supabase —
+        // the frontend only ever reads these (public SELECT policy).
+        Insert: {
+          id: string;
+          name: string;
+          credits: number;
+          price_usd: number;
+          is_active?: boolean;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          credits?: number;
+          price_usd?: number;
+          is_active?: boolean;
         };
         Relationships: [];
       };

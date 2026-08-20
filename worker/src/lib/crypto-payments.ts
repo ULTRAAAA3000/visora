@@ -129,3 +129,19 @@ export async function handleListCreditPackages(supabase: SupabaseClient): Promis
 
   return json({ success: true, data: data ?? [] });
 }
+
+/**
+ * Public — receiving wallet addresses aren't secret (they have to be
+ * shown to anyone paying), so the frontend reads them from here
+ * instead of duplicating USDT_TRC20_WALLET/USDT_BEP20_WALLET into a
+ * separate set of Pages env vars that could drift from the Worker's.
+ */
+export function handleGetPaymentConfig(env: Env): Response {
+  return json({
+    success: true,
+    data: {
+      usdt_trc20_wallet: env.USDT_TRC20_WALLET,
+      usdt_bep20_wallet: env.USDT_BEP20_WALLET,
+    },
+  });
+}

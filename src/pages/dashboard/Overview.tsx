@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Copy, Check, RefreshCw, Crown, Webhook, Send, Lock } from 'lucide-react';
+import { Copy, Check, RefreshCw, Crown, Webhook, Send, Lock, Coins } from 'lucide-react';
 import { useAuth } from '../../lib/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { generateApiKey, generateWebhookSecret } from '../../lib/apiKey';
 import { openCheckout, isCheckoutConfigured, type PaidPlan } from '../../lib/paddle';
+import BuyCreditsModal from '../../components/dashboard/BuyCreditsModal';
 
 const PLAN_LABEL: Record<string, string> = { free: 'Free', starter: 'Starter', pro: 'Pro', agency: 'Agency' };
 const WEBHOOK_PLANS = new Set(['pro', 'agency']);
@@ -26,6 +27,7 @@ export default function Overview() {
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordChanged, setPasswordChanged] = useState(false);
+  const [buyCreditsOpen, setBuyCreditsOpen] = useState(false);
 
   useEffect(() => {
     setWebhookUrlInput(profile?.webhook_url ?? '');
@@ -214,6 +216,22 @@ export default function Overview() {
             style={{ width: `${usagePct}%` }}
           />
         </div>
+
+        <div className="flex items-center justify-between mt-5 pt-5 border-t border-white/10">
+          <div className="flex items-center gap-2">
+            <Coins className="w-3.5 h-3.5 text-amber-300/70" />
+            <div>
+              <p className="text-sm text-white">{profile.credit_balance.toLocaleString('en-US')} credits</p>
+              <p className="text-[11px] text-gray-500">Used automatically once monthly renders run out</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setBuyCreditsOpen(true)}
+            className="shrink-0 liquid-glass rounded-lg font-medium px-3.5 py-2 text-xs hover:bg-white/10 transition-colors"
+          >
+            Buy credits
+          </button>
+        </div>
       </section>
 
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
@@ -369,6 +387,8 @@ export default function Overview() {
           </button>
         </form>
       </section>
+
+      <BuyCreditsModal open={buyCreditsOpen} onClose={() => setBuyCreditsOpen(false)} />
     </div>
   );
 }

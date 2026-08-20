@@ -5,7 +5,7 @@ import { handleCreateBankInvoice, runMonobankReconciliation } from './lib/bank-p
 import { handlePaddleWebhook } from './lib/billing';
 import { computeCacheKey } from './lib/cache';
 import { handleContact } from './lib/contact';
-import { handleListCreditPackages, handleVerifyCryptoPayment } from './lib/crypto-payments';
+import { handleGetPaymentConfig, handleListCreditPackages, handleVerifyCryptoPayment } from './lib/crypto-payments';
 import { fillTemplate, renderHtmlToImage, type TemplateVariables } from './lib/render';
 import { handleTrack } from './lib/track';
 import { deliverRenderWebhook } from './lib/webhook';
@@ -119,6 +119,10 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
     if (request.method === 'GET' && url.pathname === '/api/v1/payments/packages') {
       const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
       return handleListCreditPackages(supabase);
+    }
+
+    if (request.method === 'GET' && url.pathname === '/api/v1/payments/config') {
+      return handleGetPaymentConfig(env);
     }
 
     if (request.method === 'POST' && url.pathname === '/api/v1/payments/crypto/verify') {
