@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Crown, FileCode2 } from 'lucide-react';
+import { Crown } from 'lucide-react';
 import SiteHeader from '../../components/landing/SiteHeader';
 import Footer from '../../components/landing/Footer';
+import TemplateThumb from '../../components/TemplateThumb';
 import { supabase } from '../../lib/supabase';
 import { usePageMeta } from '../../lib/usePageMeta';
 import type { TemplateGalleryEntry } from '../../lib/database.types';
@@ -77,18 +78,7 @@ export default function TemplatesPublic() {
                 )}
 
                 <div className="aspect-[4/3] rounded-lg bg-black/40 border border-white/10 mb-4 overflow-hidden flex items-center justify-center">
-                  {tpl.preview_image_url ? (
-                    <img
-                      src={tpl.preview_image_url}
-                      alt={tpl.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : tpl.tier === 'agency' ? (
-                    <Crown className="w-6 h-6 text-amber-400/60" />
-                  ) : (
-                    <FileCode2 className="w-6 h-6 text-gray-600" />
-                  )}
+                  <TemplateThumb id={tpl.id} title={tpl.title} fallbackTier={tpl.tier as 'free' | 'pro' | 'agency'} />
                 </div>
                 <h2 className="font-medium text-white mb-1 pr-14">{tpl.title}</h2>
                 <p className="text-xs text-gray-500">

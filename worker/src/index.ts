@@ -75,6 +75,18 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
       return handleRender(request, env, ctx, url);
     }
 
+    // Stable, self-healing thumbnail URL for preset templates — used by
+    // the dashboard and public template galleries. Unlike storing a
+    // one-off rendered image URL in `templates.preview_image_url` (which
+    // goes stale whenever the API domain changes or a preset's
+    // html_body is edited), this path recomputes the cache key from the
+    // template's *current* state on every request. A fresh preset is
+    // rendered once, then served from R2 on every subsequent hit.
+    if (request.method === 'GET' && /^\/preview\/[^/]+\.png$/.test(url.pathname)) {
+      const templateId = url.pathname.slice('/preview/'.length, -'.png'.length);
+      return handlePreview(templateId, env);
+    }
+
     if (request.method === 'GET' && url.pathname === '/api/v1/whoami') {
       return handleWhoami(request, env);
     }
@@ -290,6 +302,72 @@ async function handleRender(request: Request, env: Env, ctx: ExecutionContext, u
       width: template.width ?? 1200,
       height: template.height ?? 630,
       format,
+    },
+  });
+}
+
+/**
+ * Public, unauthenticated thumbnail for a preset template — renders
+ * with the preset's own default_variables (there's no per-request data
+ * to render private content with, and only presets are eligible, so
+ * this can't be used to peek at another user's custom template).
+ * Cache-key based on the same (template_id, updated_at, format, data)
+ * scheme as the real render endpoint, so editing a preset's html_body
+ * automatically invalidates its stale thumbnail on the next view.
+ */
+async function handlePreview(templateId: string, env: Env): Promise<Response> {
+  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+
+  const { data: template, error } = await supabase
+    .from('templates')
+    .select('*')
+    .eq('id', templateId)
+    .eq('is_preset', true)
+    .single();
+
+  if (error || !template) {
+    return new Response('Not found', { status: 404 });
+  }
+
+  const cacheKey = await computeCacheKey(
+    templateId,
+    template.updated_at,
+    'png',
+    template.default_variables ?? {}
+  );
+
+  let object = await env.RENDERS.get(cacheKey);
+
+  if (!object) {
+    const html = fillTemplate(template.html_body, template.default_variables ?? {}, template.default_variables ?? {});
+
+    let imageBuffer: Uint8Array;
+    try {
+      imageBuffer = await renderHtmlToImage(env.MYBROWSER, {
+        html,
+        width: template.width ?? 1200,
+        height: template.height ?? 630,
+        format: 'png',
+      });
+    } catch (err) {
+      console.error('Preview render failed', err);
+      return new Response('Render failed', { status: 500 });
+    }
+
+    await env.RENDERS.put(cacheKey, imageBuffer, {
+      httpMetadata: { contentType: 'image/png' },
+    });
+    object = await env.RENDERS.get(cacheKey);
+    if (!object) return new Response('Render failed', { status: 500 });
+  }
+
+  return new Response(object.body, {
+    headers: {
+      'content-type': 'image/png',
+      // Short-ish cache: long enough to avoid re-rendering on every
+      // gallery view, short enough that an edited preset's new
+      // thumbnail shows up without needing a manual cache-bust.
+      'cache-control': 'public, max-age=3600',
     },
   });
 }
