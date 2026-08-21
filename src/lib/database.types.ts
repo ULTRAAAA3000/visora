@@ -35,6 +35,8 @@ export type Profile = {
   is_admin: boolean;
   webhook_url: string | null;
   webhook_secret: string | null;
+  watermark_logo_key: string | null;
+  watermark_enabled: boolean;
   created_at: string;
 };
 

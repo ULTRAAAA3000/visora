@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { generateApiKey, generateWebhookSecret } from '../../lib/apiKey';
 import { openCheckout, isCheckoutConfigured, type PaidPlan } from '../../lib/paddle';
 import BuyCreditsModal from '../../components/dashboard/BuyCreditsModal';
+import WatermarkSettings from '../../components/dashboard/WatermarkSettings';
 
 const PLAN_LABEL: Record<string, string> = { free: 'Free', starter: 'Starter', pro: 'Pro', agency: 'Agency' };
 const WEBHOOK_PLANS = new Set(['pro', 'agency']);
@@ -345,6 +346,8 @@ export default function Overview() {
           </>
         )}
       </section>
+
+      <WatermarkSettings />
 
       <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 mt-6">
         <div className="flex items-center gap-2 mb-4">

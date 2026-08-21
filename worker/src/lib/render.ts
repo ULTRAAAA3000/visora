@@ -29,6 +29,30 @@ export interface RenderOptions {
 }
 
 /**
+ * Overlays a semi-transparent logo in the bottom-right corner before
+ * rendering. Injected as a plain <img> with `position:fixed` — since
+ * rendering already goes through a real headless-Chromium page
+ * (renderHtmlToImage below), compositing here means Chromium does the
+ * image work for free, no separate image-manipulation library needed
+ * in the Worker. `fixed` (not `absolute`) makes it independent of
+ * whatever positioning scheme a given template's own markup uses —
+ * every preset renders it identically, in a corner of the viewport,
+ * regardless of internal layout.
+ *
+ * Percentage-based sizing/inset so it scales sensibly across very
+ * different render dimensions (a 1080x1920 Instagram Story vs a
+ * 1600x900 Shopify banner) without per-format tuning.
+ */
+export function withWatermark(html: string, logoUrl: string): string {
+  const overlay =
+    `<img src="${logoUrl}" alt="" ` +
+    `style="position:fixed;bottom:3%;right:3%;max-width:16%;max-height:16%;` +
+    `opacity:0.55;pointer-events:none;z-index:2147483647;" />`;
+
+  return /<\/body>/i.test(html) ? html.replace(/<\/body>/i, `${overlay}</body>`) : html + overlay;
+}
+
+/**
  * Renders a filled HTML string to an image buffer using Cloudflare's
  * Browser Rendering binding (a Cloudflare-managed Chromium fleet reached
  * over an RPC channel — there is no local browser process on a Worker).

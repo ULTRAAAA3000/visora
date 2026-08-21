@@ -15,6 +15,8 @@ interface AuthenticatedProfile {
   subscription_status: string;
   webhook_url: string | null;
   webhook_secret: string | null;
+  watermark_logo_key: string | null;
+  watermark_enabled: boolean;
 }
 
 type AuthResult = { profile: AuthenticatedProfile; error?: undefined } | { profile?: undefined; error: Response };
@@ -83,7 +85,10 @@ export async function authenticate(request: Request, supabase: SupabaseClient): 
 export async function authenticateBasic(
   request: Request,
   supabase: SupabaseClient
-): Promise<{ profile: { id: string; email: string }; error?: undefined } | { profile?: undefined; error: Response }> {
+): Promise<
+  | { profile: { id: string; email: string; watermark_logo_key: string | null; watermark_enabled: boolean }; error?: undefined }
+  | { profile?: undefined; error: Response }
+> {
   const authHeader = request.headers.get('Authorization') || '';
   const [scheme, token] = authHeader.split(' ');
 
@@ -96,7 +101,11 @@ export async function authenticateBasic(
     };
   }
 
-  const { data: profile, error } = await supabase.from('profiles').select('id, email').eq('api_key', token).single();
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('id, email, watermark_logo_key, watermark_enabled')
+    .eq('api_key', token)
+    .single();
 
   if (error || !profile) {
     return { error: json({ success: false, error: 'Invalid API key.' }, 401) };
