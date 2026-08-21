@@ -1,11 +1,13 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { authenticateBasic, json } from './auth';
-import { sendBankInvoiceEmail, sendCreditConfirmationEmail } from './payment-emails';
+import { fulfillProduct, resolveProduct, sendFulfillmentNotifications, type ResolvedProduct } from './crypto-payments';
+import { sendBankInvoiceEmail } from './payment-emails';
 import { sendTelegramAlert } from './telegram';
 import type { Env } from '../env';
 
 interface CreateBankInvoiceBody {
   package_id?: string;
+  plan_id?: string;
   billing_name?: string;
   billing_email?: string;
 }
@@ -14,7 +16,9 @@ interface CreateBankInvoiceBody {
  * Rail B, step 1: registers a pending invoice and emails Monobank
  * transfer details + the `VISORA-{n}` reference the cron reconciler
  * matches against. Nothing is credited yet — that happens in
- * `runMonobankReconciliation` once the transfer actually clears.
+ * `runMonobankReconciliation` once the transfer actually clears. Works
+ * for both a one-time add-on pack and a Growth/Scale plan renewal (see
+ * crypto-payments.ts's resolveProduct).
  */
 export async function handleCreateBankInvoice(request: Request, env: Env, supabase: SupabaseClient): Promise<Response> {
   const auth = await authenticateBasic(request, supabase);
@@ -34,15 +38,9 @@ export async function handleCreateBankInvoice(request: Request, env: Env, supaba
     return json({ success: false, error: '`billing_name` is required.' }, 400);
   }
 
-  const { data: pkg, error: pkgError } = await supabase
-    .from('credit_packages')
-    .select('id, credits, price_usd')
-    .eq('id', body.package_id)
-    .eq('is_active', true)
-    .single();
-  if (pkgError || !pkg) {
-    return json({ success: false, error: 'Unknown credit package.' }, 404);
-  }
+  const resolved = await resolveProduct(supabase, body);
+  if (resolved.error) return resolved.error;
+  const { product } = resolved;
 
   const { data: referenceCode, error: refError } = await supabase.rpc('generate_invoice_reference');
   if (refError || !referenceCode) {
@@ -53,9 +51,11 @@ export async function handleCreateBankInvoice(request: Request, env: Env, supaba
   const { error: insertError } = await supabase.from('invoice_requests').insert({
     user_id: profile.id,
     reference_code: referenceCode,
-    package_id: pkg.id,
-    credit_amount: pkg.credits,
-    amount_usd: pkg.price_usd,
+    product_type: product.productType,
+    package_id: product.productType === 'addon' ? product.id : null,
+    plan_id: product.productType === 'plan' ? product.id : null,
+    credit_amount: product.credits,
+    amount_usd: product.priceUsd,
     billing_name: billingName,
     billing_email: billingEmail,
     status: 'invoice_sent',
@@ -70,12 +70,12 @@ export async function handleCreateBankInvoice(request: Request, env: Env, supaba
       toEmail: billingEmail,
       toName: billingName,
       referenceCode,
-      amountUsd: Number(pkg.price_usd),
-      credits: pkg.credits,
+      amountUsd: product.priceUsd,
+      credits: product.credits,
     }),
     sendTelegramAlert(
       env,
-      `🚨 <b>New invoice requested</b>\n${referenceCode} — $${Number(pkg.price_usd).toFixed(2)} (${pkg.credits.toLocaleString('en-US')} credits)\n${billingName} &lt;${billingEmail}&gt;`
+      `🚨 <b>New invoice requested</b>\n${referenceCode} — ${product.productType === 'plan' ? `plan: ${product.id}` : `${product.credits.toLocaleString('en-US')} credits`} — $${product.priceUsd.toFixed(2)}\n${billingName} &lt;${billingEmail}&gt;`
     ),
   ]);
 
@@ -83,8 +83,9 @@ export async function handleCreateBankInvoice(request: Request, env: Env, supaba
     success: true,
     data: {
       reference_code: referenceCode,
-      amount_usd: pkg.price_usd,
-      credits: pkg.credits,
+      product_type: product.productType,
+      amount_usd: product.priceUsd,
+      credits: product.credits,
       beneficiary: env.MONO_BENEFICIARY_NAME,
       iban: env.MONO_IBAN,
       swift: env.MONO_SWIFT_CODE,
@@ -106,6 +107,9 @@ interface PendingInvoice {
   id: string;
   reference_code: string;
   user_id: string;
+  product_type: 'addon' | 'plan';
+  package_id: string | null;
+  plan_id: string | null;
   credit_amount: number;
   amount_usd: number;
   billing_name: string;
@@ -131,7 +135,7 @@ export async function runMonobankReconciliation(env: Env, supabase: SupabaseClie
 
   const { data: pending, error: pendingError } = await supabase
     .from('invoice_requests')
-    .select('id, reference_code, user_id, credit_amount, amount_usd, billing_name, billing_email')
+    .select('id, reference_code, user_id, product_type, package_id, plan_id, credit_amount, amount_usd, billing_name, billing_email')
     .eq('status', 'invoice_sent');
 
   if (pendingError) {
@@ -192,26 +196,23 @@ export async function runMonobankReconciliation(env: Env, supabase: SupabaseClie
     }
     if (!updated || updated.length === 0) continue; // already handled by a concurrent/overlapping run
 
-    const { error: creditError } = await supabase.rpc('add_credit_addon', {
-      p_user_id: invoice.user_id,
-      p_credits: invoice.credit_amount,
-      p_reference: invoice.reference_code,
-    });
-    if (creditError) {
-      console.error('add_credit_addon failed for invoice', invoice.reference_code, creditError);
+    const product: ResolvedProduct = {
+      productType: invoice.product_type,
+      id: (invoice.product_type === 'addon' ? invoice.package_id : invoice.plan_id) as string,
+      credits: invoice.credit_amount,
+      priceUsd: Number(invoice.amount_usd),
+    };
+
+    const fulfillment = await fulfillProduct(supabase, invoice.user_id, product, invoice.reference_code);
+    if (!fulfillment.ok) {
+      console.error('fulfillProduct failed for invoice', invoice.reference_code, fulfillment.error);
     }
 
     await Promise.all([
-      sendCreditConfirmationEmail(env, {
-        toEmail: invoice.billing_email,
-        toName: invoice.billing_name,
-        credits: invoice.credit_amount,
-        method: 'bank',
-        reference: invoice.reference_code,
-      }),
+      sendFulfillmentNotifications(env, { email: invoice.billing_email, name: invoice.billing_name }, product, 'bank', invoice.reference_code),
       sendTelegramAlert(
         env,
-        `⚡ <b>Auto-match success</b>\n${invoice.reference_code} confirmed via Monobank — ${invoice.credit_amount.toLocaleString('en-US')} credits added automatically.`
+        `⚡ <b>Auto-match success</b>\n${invoice.reference_code} confirmed via Monobank — ${product.productType === 'plan' ? `plan ${product.id}` : `${product.credits.toLocaleString('en-US')} credits`} added automatically.`
       ),
     ]);
   }
