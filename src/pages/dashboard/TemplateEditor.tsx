@@ -4,7 +4,9 @@ import { Save, Trash2, ArrowLeft, Code2, ListChecks, Eye, Download, Link2, Image
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/AuthContext';
 import { useToast } from '../../components/ToastProvider';
+import AspectRatioTags from '../../components/AspectRatioTags';
 import { trackVisibilityDuringRender, shouldNotifyRenderComplete } from '../../lib/renderNotify';
+import type { AspectPreset } from '../../lib/aspectRatioPresets';
 import type { Template } from '../../lib/database.types';
 import { fillTemplate, extractVariableKeys, humanizeKey, type VariableValues } from '../../lib/template';
 
@@ -292,8 +294,29 @@ export default function TemplateEditor() {
     }
   };
 
-  const handleSave = async () => {
-    if (!template || !id) return;
+  const [applyingRatio, setApplyingRatio] = useState<string | null>(null);
+
+  /** One-click marketplace aspect ratio: resizes the template's render
+   * dimensions and immediately saves + re-renders at the new size — no
+   * manual pixel entry. Takes an explicit override rather than relying
+   * on `handleSave` reading the just-set `template` state, since a
+   * `setTemplate` call hasn't flushed by the time this function's next
+   * line runs. */
+  const handleApplyAspectRatio = async (preset: AspectPreset) => {
+    if (!template) return;
+    const updated: Template = { ...template, width: preset.width, height: preset.height };
+    setTemplate(updated);
+    setApplyingRatio(preset.id);
+    try {
+      await handleSave(updated);
+    } finally {
+      setApplyingRatio(null);
+    }
+  };
+
+  const handleSave = async (overrideTemplate?: Template) => {
+    const activeTemplate = overrideTemplate ?? template;
+    if (!activeTemplate || !id) return;
     setSaving(true);
     setError(null);
     setRenderUrl(null);
@@ -301,12 +324,12 @@ export default function TemplateEditor() {
     const { error: updateError } = await supabase
       .from('templates')
       .update({
-        title: template.title,
-        category: template.category,
-        html_body: template.html_body,
+        title: activeTemplate.title,
+        category: activeTemplate.category,
+        html_body: activeTemplate.html_body,
         default_variables: variableValues,
-        width: template.width,
-        height: template.height,
+        width: activeTemplate.width,
+        height: activeTemplate.height,
       })
       .eq('id', id);
 
@@ -429,7 +452,7 @@ export default function TemplateEditor() {
             <Trash2 className="w-4 h-4" />
           </button>
           <button
-            onClick={handleSave}
+            onClick={() => handleSave()}
             disabled={saving}
             className="flex items-center gap-2 bg-white text-black rounded-lg font-medium px-3 sm:px-4 py-2 text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
@@ -500,8 +523,19 @@ export default function TemplateEditor() {
 
             {/* Right: live preview, always in sync with the fields — hidden
                 on narrow screens where the Preview tab covers this instead. */}
-            <div className="hidden lg:block flex-1 min-w-0 bg-[#0a0a0a]">
-              <ScaledPreview html={previewHtml} width={template.width} height={template.height} />
+            <div className="hidden lg:flex flex-col flex-1 min-w-0 bg-[#0a0a0a]">
+              <div className="border-b border-white/10 px-4 py-3 shrink-0">
+                <AspectRatioTags
+                  currentWidth={template.width}
+                  currentHeight={template.height}
+                  applyingId={applyingRatio}
+                  disabled={saving || rendering}
+                  onSelect={handleApplyAspectRatio}
+                />
+              </div>
+              <div className="flex-1 min-h-0">
+                <ScaledPreview html={previewHtml} width={template.width} height={template.height} />
+              </div>
             </div>
           </div>
         )}
@@ -522,8 +556,19 @@ export default function TemplateEditor() {
         )}
 
         {view === 'preview' && (
-          <div className="h-full bg-[#0a0a0a]">
-            <ScaledPreview html={previewHtml} width={template.width} height={template.height} />
+          <div className="h-full flex flex-col bg-[#0a0a0a]">
+            <div className="border-b border-white/10 px-4 py-3 shrink-0">
+              <AspectRatioTags
+                currentWidth={template.width}
+                currentHeight={template.height}
+                applyingId={applyingRatio}
+                disabled={saving || rendering}
+                onSelect={handleApplyAspectRatio}
+              />
+            </div>
+            <div className="flex-1 min-h-0">
+              <ScaledPreview html={previewHtml} width={template.width} height={template.height} />
+            </div>
           </div>
         )}
       </div>
